@@ -396,7 +396,7 @@ function QrFields({
         <Input
           value={form.url}
           onChange={(event) => updateForm("url", event.target.value)}
-         
+          placeholder="https://example.com"
           inputMode="url"
           autoComplete="url"
         />
@@ -410,7 +410,7 @@ function QrFields({
         <Textarea
           value={form.text}
           onChange={(event) => updateForm("text", event.target.value)}
-         
+          placeholder="Type anything to encode…"
           className="min-h-32 resize-none"
         />
       </FieldShell>
@@ -425,7 +425,7 @@ function QrFields({
             <Input
               value={form.wifiSsid}
               onChange={(event) => updateForm("wifiSsid", event.target.value)}
-             
+              placeholder="My Wi-Fi network"
               maxLength={32}
             />
           </FieldShell>
@@ -448,7 +448,7 @@ function QrFields({
             <Input
               value={form.wifiPassword}
               onChange={(event) => updateForm("wifiPassword", event.target.value)}
-             
+              placeholder="Wi-Fi password"
               disabled={form.wifiSecurity === "nopass"}
             />
           </FieldShell>
@@ -473,7 +473,7 @@ function QrFields({
           <Input
             value={form.email}
             onChange={(event) => updateForm("email", event.target.value)}
-           
+            placeholder="name@example.com"
             inputMode="email"
             autoComplete="email"
           />
@@ -482,14 +482,14 @@ function QrFields({
           <Input
             value={form.emailSubject}
             onChange={(event) => updateForm("emailSubject", event.target.value)}
-           
+            placeholder="Email subject"
           />
         </FieldShell>
         <FieldShell label="Message" icon={<Type className="size-4" />}>
           <Textarea
             value={form.emailBody}
             onChange={(event) => updateForm("emailBody", event.target.value)}
-           
+            placeholder="Write your message…"
             className="min-h-24 resize-none"
           />
         </FieldShell>
@@ -502,7 +502,7 @@ function QrFields({
       <Input
         value={form.phone}
         onChange={(event) => updateForm("phone", event.target.value)}
-       
+        placeholder="+1 555 123 4567"
         inputMode="tel"
         autoComplete="tel"
       />
