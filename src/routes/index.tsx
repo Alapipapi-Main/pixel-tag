@@ -93,6 +93,22 @@ export const Route = createFileRoute("/")({
       { name: "application-name", content: "Pixel Tag" },
       { name: "apple-mobile-web-app-title", content: "Pixel Tag" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Pixel Tag",
+          applicationCategory: "UtilitiesApplication",
+          operatingSystem: "Any",
+          url: "https://pixel-tag.lovable.app/",
+          description:
+            "Create and customize QR codes for websites, text, Wi-Fi, email, and phone numbers.",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        }),
+      },
+    ],
   }),
   component: PixelTagHome,
 });
@@ -217,9 +233,9 @@ function PixelTagHome() {
                   <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-brand">Generator</p>
-                      <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
+                      <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
                         Create QR Codes in Seconds.
-                      </h1>
+                      </h2>
                     </div>
                     <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-xs font-semibold text-muted-foreground">
                       <span className="size-2 rounded-full bg-success" /> Live preview
@@ -271,13 +287,16 @@ function PixelTagHome() {
 
                     <div className="rounded-2xl border border-border bg-surface p-5">
                       <div className="flex items-center justify-between gap-4">
-                        <Label className="text-base font-semibold">QR Code Size</Label>
+                        <Label htmlFor="qr-code-size" className="text-base font-semibold">
+                          QR Code Size
+                        </Label>
                         <span className="rounded-xl bg-muted px-4 py-2 font-mono text-sm text-muted-foreground">
                           {qrSize} x {qrSize} px
                         </span>
                       </div>
                       <div className="mt-6">
                         <Slider
+                          id="qr-code-size"
                           value={[qrSize]}
                           min={192}
                           max={512}
@@ -329,10 +348,18 @@ function SiteHeader({ theme, onThemeToggle }: { theme: ThemeMode; onThemeToggle:
   return (
     <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
       <a href="/" className="flex items-center gap-3" aria-label="Pixel Tag home">
-        <img src={pixeltagLogo} alt="Pixel Tag logo" width={1024} height={1024} className="size-11 rounded-xl shadow-brand" />
+        <img
+          src={pixeltagLogo}
+          alt=""
+          width={1024}
+          height={1024}
+          className="size-11 rounded-xl shadow-brand"
+        />
         <div>
           <p className="font-display text-lg font-bold leading-none text-foreground">Pixel Tag</p>
-          <p className="mt-1 text-xs font-medium text-muted-foreground">Create QR Codes in Seconds.</p>
+          <p className="mt-1 text-xs font-medium text-muted-foreground">
+            Create QR Codes in Seconds.
+          </p>
         </div>
       </a>
 
@@ -352,15 +379,21 @@ function BrandPanel() {
   return (
     <section className="animate-soft-in space-y-6 text-center lg:text-left">
       <div className="mx-auto flex size-28 items-center justify-center rounded-3xl bg-brand-gradient p-2 shadow-brand lg:mx-0">
-        <img src={pixeltagLogo} alt="Pixel Tag logo" width={1024} height={1024} className="size-full rounded-2xl" />
+        <img
+          src={pixeltagLogo}
+          alt="Pixel Tag QR code generator mark"
+          width={1024}
+          height={1024}
+          className="size-full rounded-2xl"
+        />
       </div>
       <div className="space-y-4">
         <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-brand-soft-foreground backdrop-blur lg:mx-0">
           <QrCode className="size-4" /> Instant QR studio
         </div>
-        <h2 className="mx-auto max-w-2xl font-display text-5xl font-bold leading-[1.02] text-foreground sm:text-6xl lg:mx-0 lg:text-7xl">
+        <h1 className="mx-auto max-w-2xl font-display text-5xl font-bold leading-[1.02] text-foreground sm:text-6xl lg:mx-0 lg:text-7xl">
           Pixel-perfect codes, ready before the moment passes.
-        </h2>
+        </h1>
         <p className="mx-auto max-w-xl text-base leading-8 text-muted-foreground sm:text-lg lg:mx-0">
           Generate polished QR codes for links, notes, Wi-Fi access, emails, and phone numbers with precise color and export controls.
         </p>
@@ -392,8 +425,9 @@ function QrFields({
 }) {
   if (qrType === "url") {
     return (
-      <FieldShell label="Website URL" icon={<Globe2 className="size-4" />}>
+      <FieldShell id="website-url" label="Website URL" icon={<Globe2 className="size-4" />}>
         <Input
+          id="website-url"
           value={form.url}
           onChange={(event) => updateForm("url", event.target.value)}
           placeholder="https://example.com"
@@ -406,8 +440,9 @@ function QrFields({
 
   if (qrType === "text") {
     return (
-      <FieldShell label="Text" icon={<Type className="size-4" />}>
+      <FieldShell id="text-content" label="Text" icon={<Type className="size-4" />}>
         <Textarea
+          id="text-content"
           value={form.text}
           onChange={(event) => updateForm("text", event.target.value)}
           placeholder="Type anything to encode…"
@@ -421,17 +456,25 @@ function QrFields({
     return (
       <div className="grid gap-4">
         <div className="grid gap-4 md:grid-cols-[1fr_12rem]">
-          <FieldShell label="Network name" icon={<Wifi className="size-4" />}>
+          <FieldShell
+            id="wifi-network-name"
+            label="Network name"
+            icon={<Wifi className="size-4" />}
+          >
             <Input
+              id="wifi-network-name"
               value={form.wifiSsid}
               onChange={(event) => updateForm("wifiSsid", event.target.value)}
               placeholder="My Wi-Fi network"
               maxLength={32}
             />
           </FieldShell>
-          <FieldShell label="Security" icon={<QrCode className="size-4" />}>
-            <Select value={form.wifiSecurity} onValueChange={(value: WifiSecurity) => updateForm("wifiSecurity", value)}>
-              <SelectTrigger>
+          <FieldShell id="wifi-security" label="Security" icon={<QrCode className="size-4" />}>
+            <Select
+              value={form.wifiSecurity}
+              onValueChange={(value: WifiSecurity) => updateForm("wifiSecurity", value)}
+            >
+              <SelectTrigger id="wifi-security">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -444,8 +487,9 @@ function QrFields({
           </FieldShell>
         </div>
         <div className="grid gap-4 md:grid-cols-[1fr_12rem]">
-          <FieldShell label="Password" icon={<Clipboard className="size-4" />}>
+          <FieldShell id="wifi-password" label="Password" icon={<Clipboard className="size-4" />}>
             <Input
+              id="wifi-password"
               value={form.wifiPassword}
               onChange={(event) => updateForm("wifiPassword", event.target.value)}
               placeholder="Wi-Fi password"
@@ -455,10 +499,16 @@ function QrFields({
           <div className="rounded-2xl border border-border bg-surface p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <Label className="text-sm font-semibold">Hidden network</Label>
+                <Label htmlFor="wifi-hidden" className="text-sm font-semibold">
+                  Hidden network
+                </Label>
                 <p className="mt-1 text-xs text-muted-foreground">SSID is not broadcast</p>
               </div>
-              <Switch checked={form.wifiHidden} onCheckedChange={(checked) => updateForm("wifiHidden", checked)} />
+              <Switch
+                id="wifi-hidden"
+                checked={form.wifiHidden}
+                onCheckedChange={(checked) => updateForm("wifiHidden", checked)}
+              />
             </div>
           </div>
         </div>
@@ -469,8 +519,9 @@ function QrFields({
   if (qrType === "email") {
     return (
       <div className="grid gap-4">
-        <FieldShell label="Email address" icon={<AtSign className="size-4" />}>
+        <FieldShell id="email-address" label="Email address" icon={<AtSign className="size-4" />}>
           <Input
+            id="email-address"
             value={form.email}
             onChange={(event) => updateForm("email", event.target.value)}
             placeholder="name@example.com"
@@ -478,15 +529,17 @@ function QrFields({
             autoComplete="email"
           />
         </FieldShell>
-        <FieldShell label="Subject" icon={<Mail className="size-4" />}>
+        <FieldShell id="email-subject" label="Subject" icon={<Mail className="size-4" />}>
           <Input
+            id="email-subject"
             value={form.emailSubject}
             onChange={(event) => updateForm("emailSubject", event.target.value)}
             placeholder="Email subject"
           />
         </FieldShell>
-        <FieldShell label="Message" icon={<Type className="size-4" />}>
+        <FieldShell id="email-message" label="Message" icon={<Type className="size-4" />}>
           <Textarea
+            id="email-message"
             value={form.emailBody}
             onChange={(event) => updateForm("emailBody", event.target.value)}
             placeholder="Write your message…"
@@ -498,8 +551,9 @@ function QrFields({
   }
 
   return (
-    <FieldShell label="Phone number" icon={<Phone className="size-4" />}>
+    <FieldShell id="phone-number" label="Phone number" icon={<Phone className="size-4" />}>
       <Input
+        id="phone-number"
         value={form.phone}
         onChange={(event) => updateForm("phone", event.target.value)}
         placeholder="+1 555 123 4567"
@@ -510,11 +564,26 @@ function QrFields({
   );
 }
 
-function FieldShell({ label, icon, children }: { label: string; icon: React.ReactNode; children: React.ReactNode }) {
+function FieldShell({
+  id,
+  label,
+  icon,
+  children,
+}: {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-surface p-4">
-      <Label className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand-soft-foreground">{icon}</span>
+      <Label
+        htmlFor={id}
+        className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground"
+      >
+        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand-soft-foreground">
+          {icon}
+        </span>
         {label}
       </Label>
       {children}
@@ -533,21 +602,33 @@ function ColorControl({
   onChange: (value: string) => void;
   icon: React.ReactNode;
 }) {
+  const inputId = label.toLowerCase().replaceAll(" ", "-");
+  const hexInputId = `${inputId}-hex`;
+
   return (
     <div className="rounded-2xl border border-border bg-surface p-4">
-      <Label className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand-soft-foreground">{icon}</span>
+      <Label
+        htmlFor={inputId}
+        className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground"
+      >
+        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand-soft-foreground">
+          {icon}
+        </span>
         {label}
       </Label>
       <div className="grid grid-cols-[3.25rem_1fr] gap-3">
         <input
+          id={inputId}
           type="color"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           className="h-10 w-full cursor-pointer rounded-lg border border-input bg-background p-1"
           aria-label={label}
         />
-        <Input value={value} onChange={(event) => onChange(event.target.value)} aria-label={`${label} hex value`} />
+        <Label htmlFor={hexInputId} className="sr-only">
+          {label} hex value
+        </Label>
+        <Input id={hexInputId} value={value} onChange={(event) => onChange(event.target.value)} />
       </div>
     </div>
   );
@@ -588,7 +669,7 @@ function PreviewPanel({
           <img
             key={`${qrPayload}-${qrSize}`}
             src={qrDataUrl}
-            alt={`${qrType} QR code preview`}
+            alt={`Generated QR code for ${qrType}`}
             width={qrSize}
             height={qrSize}
             className="animate-soft-in h-auto max-h-[20rem] w-full max-w-[20rem] rounded-xl shadow-soft"
@@ -611,7 +692,14 @@ function SiteFooter() {
   return (
     <footer className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
       <div className="flex items-center gap-2">
-        <img src={pixeltagLogo} alt="Pixel Tag logo" width={1024} height={1024} loading="lazy" className="size-7 rounded-lg" />
+        <img
+          src={pixeltagLogo}
+          alt=""
+          width={1024}
+          height={1024}
+          loading="lazy"
+          className="size-7 rounded-lg"
+        />
         <span className="font-semibold text-foreground">Pixel Tag</span>
       </div>
       <p>No sign-up. No waiting. Just clean QR codes.</p>
