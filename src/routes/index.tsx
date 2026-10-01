@@ -74,13 +74,13 @@ const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pixel Tag — Create QR Codes in Seconds" },
+      { title: "Pixel Tag" },
       {
         name: "description",
         content:
           "Create custom QR codes instantly for websites, text, Wi-Fi, email, and phone numbers with Pixel Tag.",
       },
-      { property: "og:title", content: "Pixel Tag — Create QR Codes in Seconds" },
+      { property: "og:title", content: "Pixel Tag" },
       {
         property: "og:description",
         content:
