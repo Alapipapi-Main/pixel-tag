@@ -88,6 +88,8 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://id-preview--ab8c9ea1-c4b8-4857-98a1-e9c301c592bf.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://id-preview--ab8c9ea1-c4b8-4857-98a1-e9c301c592bf.lovable.app/og-image.jpg" },
       { name: "application-name", content: "Pixel Tag" },
       { name: "apple-mobile-web-app-title", content: "Pixel Tag" },
     ],
