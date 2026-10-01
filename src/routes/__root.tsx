@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "PixelTag" },
+      { name: "author", content: "Pixel Tag" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -137,12 +137,12 @@ function LoadingScreen() {
         <div className="absolute size-24 rounded-2xl bg-brand-soft animate-pulse-ring" />
         <img
           src={pixeltagLogo}
-          alt="PixelTag"
+          alt="Pixel Tag"
           width={1024}
           height={1024}
           className="relative size-20 rounded-2xl shadow-brand"
         />
-        <p className="font-display text-lg font-semibold text-foreground">PixelTag</p>
+        <p className="font-display text-lg font-semibold text-foreground">Pixel Tag</p>
       </div>
     </div>
   );
