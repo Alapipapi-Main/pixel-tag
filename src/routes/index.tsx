@@ -50,16 +50,16 @@ type FormState = {
 };
 
 const defaultForm: FormState = {
-  url: "https://pixeltag.app",
-  text: "Create QR Codes in Seconds.",
-  wifiSsid: "PixelTag Guest",
+  url: "",
+  text: "",
+  wifiSsid: "",
   wifiPassword: "",
   wifiSecurity: "WPA",
   wifiHidden: false,
-  email: "hello@pixeltag.app",
-  emailSubject: "Hello from PixelTag",
-  emailBody: "I created this QR code with PixelTag.",
-  phone: "+12025550188",
+  email: "",
+  emailSubject: "",
+  emailBody: "",
+  phone: "",
 };
 
 const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
@@ -70,18 +70,17 @@ const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
   { value: "phone", label: "Phone", icon: Phone },
 ];
 
-const qrSizeOptions = [192, 256, 320, 384, 512];
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "PixelTag — Create QR Codes in Seconds" },
+      { title: "Pixel Tag — Create QR Codes in Seconds" },
       {
         name: "description",
         content:
-          "Create custom QR codes instantly for websites, text, Wi-Fi, email, and phone numbers with PixelTag.",
+          "Create custom QR codes instantly for websites, text, Wi-Fi, email, and phone numbers with Pixel Tag.",
       },
-      { property: "og:title", content: "PixelTag — Create QR Codes in Seconds" },
+      { property: "og:title", content: "Pixel Tag — Create QR Codes in Seconds" },
       {
         property: "og:description",
         content:
@@ -89,8 +88,10 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "application-name", content: "PixelTag" },
-      { name: "apple-mobile-web-app-title", content: "PixelTag" },
+      { property: "og:image", content: "https://id-preview--ab8c9ea1-c4b8-4857-98a1-e9c301c592bf.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://id-preview--ab8c9ea1-c4b8-4857-98a1-e9c301c592bf.lovable.app/og-image.jpg" },
+      { name: "application-name", content: "Pixel Tag" },
+      { name: "apple-mobile-web-app-title", content: "Pixel Tag" },
     ],
   }),
   component: PixelTagHome,
@@ -181,18 +182,23 @@ function PixelTagHome() {
 
     const link = document.createElement("a");
     link.href = qrDataUrl;
-    link.download = `pixeltag-${qrType}-${qrSize}.png`;
+    link.download = `pixel-tag-${qrType}-${qrSize}.png`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     toast.success("PNG downloaded");
   };
 
-  const clearFields = () => {
-    setForm({ ...defaultForm, [activeContentKey(qrType)]: "" });
+  const resetAll = () => {
+    setForm(defaultForm);
     setQrColor("#0f172a");
     setBackgroundColor("#ffffff");
+    setQrSize(320);
     setCopied(false);
+  };
+
+  const clearFields = () => {
+    resetAll();
     toast("Fields cleared");
   };
 
@@ -230,7 +236,12 @@ function PixelTagHome() {
                           type="button"
                           variant={isActive ? "brand" : "soft"}
                           className="h-auto min-h-16 flex-col gap-1 px-2 py-3 text-center text-xs sm:text-[0.8rem]"
-                          onClick={() => setQrType(type.value)}
+                          onClick={() => {
+                            if (type.value !== qrType) {
+                              setQrType(type.value);
+                              resetAll();
+                            }
+                          }}
                           aria-pressed={isActive}
                         >
                           <Icon className="size-4" />
@@ -258,14 +269,14 @@ function PixelTagHome() {
                       />
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-surface p-4">
+                    <div className="rounded-2xl border border-border bg-surface p-5">
                       <div className="flex items-center justify-between gap-4">
-                        <Label className="text-sm font-semibold">QR code size</Label>
-                        <span className="rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand-soft-foreground">
-                          {qrSize}px
+                        <Label className="text-base font-semibold">QR Code Size</Label>
+                        <span className="rounded-xl bg-muted px-4 py-2 font-mono text-sm text-muted-foreground">
+                          {qrSize} x {qrSize} px
                         </span>
                       </div>
-                      <div className="mt-4">
+                      <div className="mt-6">
                         <Slider
                           value={[qrSize]}
                           min={192}
@@ -275,10 +286,9 @@ function PixelTagHome() {
                           aria-label="QR code size"
                         />
                       </div>
-                      <div className="mt-3 flex justify-between text-xs text-muted-foreground">
-                        {qrSizeOptions.map((size) => (
-                          <span key={size}>{size}</span>
-                        ))}
+                      <div className="mt-4 flex justify-between text-sm text-muted-foreground">
+                        <span>Small (192px)</span>
+                        <span>Large (512px)</span>
                       </div>
                     </div>
 
@@ -318,10 +328,10 @@ function PixelTagHome() {
 function SiteHeader({ theme, onThemeToggle }: { theme: ThemeMode; onThemeToggle: () => void }) {
   return (
     <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-      <a href="/" className="flex items-center gap-3" aria-label="PixelTag home">
-        <img src={pixeltagLogo} alt="PixelTag logo" width={1024} height={1024} className="size-11 rounded-xl shadow-brand" />
+      <a href="/" className="flex items-center gap-3" aria-label="Pixel Tag home">
+        <img src={pixeltagLogo} alt="Pixel Tag logo" width={1024} height={1024} className="size-11 rounded-xl shadow-brand" />
         <div>
-          <p className="font-display text-lg font-bold leading-none text-foreground">PixelTag</p>
+          <p className="font-display text-lg font-bold leading-none text-foreground">Pixel Tag</p>
           <p className="mt-1 text-xs font-medium text-muted-foreground">Create QR Codes in Seconds.</p>
         </div>
       </a>
@@ -342,7 +352,7 @@ function BrandPanel() {
   return (
     <section className="animate-soft-in space-y-6 text-center lg:text-left">
       <div className="mx-auto flex size-28 items-center justify-center rounded-3xl bg-brand-gradient p-2 shadow-brand lg:mx-0">
-        <img src={pixeltagLogo} alt="PixelTag logo" width={1024} height={1024} className="size-full rounded-2xl" />
+        <img src={pixeltagLogo} alt="Pixel Tag logo" width={1024} height={1024} className="size-full rounded-2xl" />
       </div>
       <div className="space-y-4">
         <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-brand-soft-foreground backdrop-blur lg:mx-0">
@@ -386,7 +396,7 @@ function QrFields({
         <Input
           value={form.url}
           onChange={(event) => updateForm("url", event.target.value)}
-          placeholder="https://example.com"
+         
           inputMode="url"
           autoComplete="url"
         />
@@ -400,7 +410,7 @@ function QrFields({
         <Textarea
           value={form.text}
           onChange={(event) => updateForm("text", event.target.value)}
-          placeholder="Write anything to encode"
+         
           className="min-h-32 resize-none"
         />
       </FieldShell>
@@ -415,7 +425,7 @@ function QrFields({
             <Input
               value={form.wifiSsid}
               onChange={(event) => updateForm("wifiSsid", event.target.value)}
-              placeholder="Guest Wi-Fi"
+             
               maxLength={32}
             />
           </FieldShell>
@@ -438,7 +448,7 @@ function QrFields({
             <Input
               value={form.wifiPassword}
               onChange={(event) => updateForm("wifiPassword", event.target.value)}
-              placeholder={form.wifiSecurity === "nopass" ? "Not required" : "Network password"}
+             
               disabled={form.wifiSecurity === "nopass"}
             />
           </FieldShell>
@@ -463,7 +473,7 @@ function QrFields({
           <Input
             value={form.email}
             onChange={(event) => updateForm("email", event.target.value)}
-            placeholder="name@example.com"
+           
             inputMode="email"
             autoComplete="email"
           />
@@ -472,14 +482,14 @@ function QrFields({
           <Input
             value={form.emailSubject}
             onChange={(event) => updateForm("emailSubject", event.target.value)}
-            placeholder="Optional subject"
+           
           />
         </FieldShell>
         <FieldShell label="Message" icon={<Type className="size-4" />}>
           <Textarea
             value={form.emailBody}
             onChange={(event) => updateForm("emailBody", event.target.value)}
-            placeholder="Optional message"
+           
             className="min-h-24 resize-none"
           />
         </FieldShell>
@@ -492,7 +502,7 @@ function QrFields({
       <Input
         value={form.phone}
         onChange={(event) => updateForm("phone", event.target.value)}
-        placeholder="+12025550188"
+       
         inputMode="tel"
         autoComplete="tel"
       />
@@ -593,12 +603,6 @@ function PreviewPanel({
         )}
       </div>
 
-      <div className="mt-5 rounded-2xl border border-border bg-surface p-4">
-        <p className="text-xs font-bold uppercase text-muted-foreground">Encoded content</p>
-        <p className="mt-2 max-h-24 overflow-auto break-all font-mono text-xs leading-5 text-foreground">
-          {qrPayload || "Your QR payload will appear here."}
-        </p>
-      </div>
     </aside>
   );
 }
@@ -607,8 +611,8 @@ function SiteFooter() {
   return (
     <footer className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
       <div className="flex items-center gap-2">
-        <img src={pixeltagLogo} alt="PixelTag logo" width={1024} height={1024} loading="lazy" className="size-7 rounded-lg" />
-        <span className="font-semibold text-foreground">PixelTag</span>
+        <img src={pixeltagLogo} alt="Pixel Tag logo" width={1024} height={1024} loading="lazy" className="size-7 rounded-lg" />
+        <span className="font-semibold text-foreground">Pixel Tag</span>
       </div>
       <p>No sign-up. No waiting. Just clean QR codes.</p>
     </footer>
@@ -727,20 +731,4 @@ function normalizePhone(value: string) {
     return null;
   }
   return cleaned;
-}
-
-function activeContentKey(qrType: QrType): keyof FormState {
-  if (qrType === "url") {
-    return "url";
-  }
-  if (qrType === "text") {
-    return "text";
-  }
-  if (qrType === "wifi") {
-    return "wifiSsid";
-  }
-  if (qrType === "email") {
-    return "email";
-  }
-  return "phone";
 }
