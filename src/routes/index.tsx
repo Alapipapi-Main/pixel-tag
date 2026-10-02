@@ -224,29 +224,31 @@ function PixelTagHome() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen overflow-hidden bg-page-gradient text-foreground">
+      <div className="min-h-screen overflow-x-clip bg-page-gradient text-foreground">
         <SiteHeader theme={theme} onThemeToggle={() => setTheme(theme === "dark" ? "light" : "dark")} />
 
         <main className="mx-auto flex w-full max-w-7xl flex-col items-center px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-          <section className="grid min-h-[calc(100vh-8rem)] w-full items-center gap-8 py-6 lg:grid-cols-[0.9fr_1.1fr] lg:py-10">
+          <section className="grid min-h-[calc(100vh-8rem)] w-full items-center gap-8 py-6 xl:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.28fr)] xl:py-10">
             <BrandPanel />
 
-            <div className="animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
-                <section className="rounded-2xl border border-border/80 bg-surface-strong/80 p-4 sm:p-5">
-                  <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
+            <div className="min-w-0 animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
+              <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+                <section className="min-w-0 rounded-2xl border border-border/80 bg-surface-strong/80 p-4 sm:p-5">
+                  <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                    <div className="min-w-0">
                       <p className="text-sm font-semibold text-brand">Generator</p>
                       <h2 className="font-display text-2xl font-bold text-foreground sm:text-3xl">
                         Create QR Codes in Seconds.
                       </h2>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-xs font-semibold text-muted-foreground">
-                      <span className="size-2 rounded-full bg-success" /> Live preview
+                    <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-surface px-2.5 py-2 text-xs font-semibold text-muted-foreground sm:px-3">
+                      <span className="size-2 shrink-0 rounded-full bg-success" />
+                      <span className="hidden sm:inline">Live preview</span>
+                      <span className="sm:hidden">Live</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
                     {qrTypes.map((type) => {
                       const Icon = type.icon;
                       const isActive = qrType === type.value;
@@ -255,7 +257,7 @@ function PixelTagHome() {
                           key={type.value}
                           type="button"
                           variant={isActive ? "brand" : "soft"}
-                          className="h-auto min-h-16 flex-col gap-1 px-2 py-3 text-center text-xs sm:text-[0.8rem]"
+                          className="h-auto min-h-16 min-w-0 flex-col gap-1 px-2 py-3 text-center text-xs sm:text-[0.8rem]"
                           onClick={() => {
                             if (type.value !== qrType) {
                               setQrType(type.value);
@@ -265,7 +267,7 @@ function PixelTagHome() {
                           aria-pressed={isActive}
                         >
                           <Icon className="size-4" />
-                          <span>{type.label}</span>
+                           <span className="max-w-full whitespace-normal leading-tight">{type.label}</span>
                         </Button>
                       );
                     })}
@@ -274,7 +276,7 @@ function PixelTagHome() {
                   <div className="mt-5 space-y-5">
                     <QrFields qrType={qrType} form={form} updateForm={updateForm} />
 
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       <ColorControl
                         label="QR color"
                         value={qrColor}
@@ -289,12 +291,12 @@ function PixelTagHome() {
                       />
                     </div>
 
-                    <div className="rounded-2xl border border-border bg-surface p-5">
-                      <div className="flex items-center justify-between gap-4">
+                    <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
                         <Label htmlFor="qr-code-size" className="text-base font-semibold">
                           QR Code Size
                         </Label>
-                        <span className="rounded-xl bg-muted px-4 py-2 font-mono text-sm text-muted-foreground">
+                        <span className="shrink-0 rounded-xl bg-muted px-3 py-2 font-mono text-xs text-muted-foreground sm:px-4 sm:text-sm">
                           {qrSize} x {qrSize} px
                         </span>
                       </div>
@@ -309,9 +311,9 @@ function PixelTagHome() {
                           aria-label="QR code size"
                         />
                       </div>
-                      <div className="mt-4 flex justify-between text-sm text-muted-foreground">
+                      <div className="mt-4 grid grid-cols-2 gap-3 text-xs text-muted-foreground sm:text-sm">
                         <span>Small (192px)</span>
-                        <span>Large (512px)</span>
+                        <span className="text-right">Large (512px)</span>
                       </div>
                     </div>
 
@@ -350,18 +352,18 @@ function PixelTagHome() {
 
 function SiteHeader({ theme, onThemeToggle }: { theme: ThemeMode; onThemeToggle: () => void }) {
   return (
-    <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-      <a href="/" className="flex items-center gap-3" aria-label="Pixel Tag home">
+    <header className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-4 sm:flex sm:justify-between sm:px-6 lg:px-8">
+      <a href="/" className="flex min-w-0 items-center gap-3" aria-label="Pixel Tag home">
         <img
           src={pixeltagLogo}
           alt=""
           width={1024}
           height={1024}
-          className="size-11 rounded-xl shadow-brand"
+          className="size-11 shrink-0 rounded-xl shadow-brand"
         />
-        <div>
-          <p className="font-display text-lg font-bold leading-none text-foreground">Pixel Tag</p>
-          <p className="mt-1 text-xs font-medium text-muted-foreground">
+        <div className="min-w-0">
+          <p className="truncate font-display text-lg font-bold leading-none text-foreground">Pixel Tag</p>
+          <p className="mt-1 truncate text-xs font-medium text-muted-foreground">
             Create QR Codes in Seconds.
           </p>
         </div>
@@ -381,8 +383,8 @@ function SiteHeader({ theme, onThemeToggle }: { theme: ThemeMode; onThemeToggle:
 
 function BrandPanel() {
   return (
-    <section className="animate-soft-in space-y-6 text-center lg:text-left">
-      <div className="mx-auto flex size-28 items-center justify-center rounded-3xl bg-brand-gradient p-2 shadow-brand lg:mx-0">
+    <section className="animate-soft-in space-y-6 text-center xl:text-left">
+      <div className="mx-auto flex size-24 items-center justify-center rounded-3xl bg-brand-gradient p-2 shadow-brand sm:size-28 xl:mx-0">
         <img
           src={pixeltagLogo}
           alt="Pixel Tag QR code generator mark"
@@ -392,17 +394,17 @@ function BrandPanel() {
         />
       </div>
       <div className="space-y-4">
-        <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-brand-soft-foreground backdrop-blur lg:mx-0">
+        <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-brand-soft-foreground backdrop-blur xl:mx-0">
           <QrCode className="size-4" /> Instant QR studio
         </div>
-        <h1 className="mx-auto max-w-2xl font-display text-5xl font-bold leading-[1.02] text-foreground sm:text-6xl lg:mx-0 lg:text-7xl">
+        <h1 className="mx-auto max-w-2xl font-display text-4xl font-bold leading-[1.08] text-foreground sm:text-6xl xl:mx-0 xl:text-7xl">
           Pixel-perfect codes, ready before the moment passes.
         </h1>
-        <p className="mx-auto max-w-xl text-base leading-8 text-muted-foreground sm:text-lg lg:mx-0">
+        <p className="mx-auto max-w-xl text-base leading-8 text-muted-foreground sm:text-lg xl:mx-0">
           Generate polished QR codes for links, notes, Wi-Fi access, emails, and phone numbers with precise color and export controls.
         </p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3 lg:max-w-xl">
+      <div className="grid gap-3 sm:grid-cols-3 xl:max-w-xl">
         {[
           ["5", "QR types"],
           ["PNG", "instant export"],
@@ -620,7 +622,7 @@ function ColorControl({
         </span>
         {label}
       </Label>
-      <div className="grid grid-cols-[3.25rem_1fr] gap-3">
+      <div className="grid min-w-0 grid-cols-[3.25rem_minmax(0,1fr)] gap-3">
         <input
           id={inputId}
           type="color"
@@ -632,7 +634,12 @@ function ColorControl({
         <Label htmlFor={hexInputId} className="sr-only">
           {label} hex value
         </Label>
-        <Input id={hexInputId} value={value} onChange={(event) => onChange(event.target.value)} />
+        <Input
+          id={hexInputId}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="min-w-0 px-2 font-mono sm:px-3"
+        />
       </div>
     </div>
   );
@@ -652,9 +659,9 @@ function PreviewPanel({
   qrType: QrType;
 }) {
   return (
-    <aside className="rounded-2xl border border-border/80 bg-surface-strong/90 p-4 sm:p-5">
-      <div className="flex items-center justify-between gap-3">
-        <div>
+    <aside className="min-w-0 rounded-2xl border border-border/80 bg-surface-strong/90 p-4 sm:p-5">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-brand">Preview</p>
           <h3 className="font-display text-xl font-bold text-foreground">Scan-ready PNG</h3>
         </div>
@@ -668,7 +675,7 @@ function PreviewPanel({
         </span>
       </div>
 
-      <div className="mt-6 flex min-h-[20rem] items-center justify-center rounded-3xl border border-border bg-background/70 p-6 shadow-inner">
+      <div className="mt-6 flex min-h-64 items-center justify-center rounded-3xl border border-border bg-background/70 p-4 shadow-inner sm:min-h-80 sm:p-6">
         {qrDataUrl ? (
           <img
             key={`${qrPayload}-${qrSize}`}
