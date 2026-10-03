@@ -185,7 +185,7 @@ function PixelTagHome() {
     return () => {
       cancelled = true;
     };
-  }, [backgroundColor, qrColor, qrPayload, qrSize, validation.valid]);
+  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, validation.valid]);
 
   const updateForm = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -223,6 +223,7 @@ function PixelTagHome() {
     setQrColor("#0f172a");
     setBackgroundColor("#ffffff");
     setQrSize(320);
+    setQuality("M");
     setCopied(false);
   };
 
