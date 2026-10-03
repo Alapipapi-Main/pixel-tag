@@ -117,12 +117,21 @@ export const Route = createFileRoute("/")({
   component: PixelTagHome,
 });
 
+type QualityLevel = "L" | "M" | "Q" | "H";
+const qualityLevels: { value: QualityLevel; label: string; recovery: string }[] = [
+  { value: "L", label: "Low", recovery: "7%" },
+  { value: "M", label: "Medium", recovery: "15%" },
+  { value: "Q", label: "High", recovery: "25%" },
+  { value: "H", label: "Max", recovery: "30%" },
+];
+
 function PixelTagHome() {
   const [qrType, setQrType] = useState<QrType>("url");
   const [form, setForm] = useState<FormState>(defaultForm);
   const [qrColor, setQrColor] = useState("#0f172a");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(320);
+  const [quality, setQuality] = useState<QualityLevel>("M");
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [copied, setCopied] = useState(false);
@@ -156,7 +165,7 @@ function PixelTagHome() {
     QRCode.toDataURL(qrPayload, {
       width: qrSize,
       margin: 2,
-      errorCorrectionLevel: "M",
+      errorCorrectionLevel: quality,
       color: {
         dark: qrColor,
         light: backgroundColor,
@@ -317,16 +326,41 @@ function PixelTagHome() {
                       </div>
                     </div>
 
-                    <div className="grid gap-2 sm:grid-cols-3">
-                      <Button type="button" size="xl" variant="brand" onClick={downloadQr} disabled={!qrDataUrl}>
-                        <Download className="size-4" /> Download PNG
+                    <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                        <span className="text-base font-semibold">QR Quality</span>
+                        <span className="shrink-0 text-xs text-muted-foreground sm:text-sm">
+                          Recovers ~{qualityLevels.find((q) => q.value === quality)?.recovery} if damaged
+                        </span>
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="QR quality">
+                        {qualityLevels.map((level) => (
+                          <Button
+                            key={level.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={quality === level.value}
+                            variant={quality === level.value ? "brand" : "soft"}
+                            className="h-auto min-w-0 flex-col gap-0.5 px-2 py-2.5 text-xs"
+                            onClick={() => setQuality(level.value)}
+                          >
+                            <span className="font-semibold">{level.label}</span>
+                            <span className="opacity-80">{level.recovery}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
+                      <Button type="button" size="xl" variant="brand" className="min-w-0 sm:col-span-2 2xl:col-span-1" onClick={downloadQr} disabled={!qrDataUrl}>
+                        <Download className="size-4 shrink-0" /> <span className="truncate">Download PNG</span>
                       </Button>
-                      <Button type="button" size="xl" variant="soft" onClick={copyPayload} disabled={!qrPayload}>
-                        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-                        {copied ? "Copied" : "Copy content"}
+                      <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyPayload} disabled={!qrPayload}>
+                        {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
+                        <span className="truncate">{copied ? "Copied" : "Copy content"}</span>
                       </Button>
-                      <Button type="button" size="xl" variant="outline" onClick={clearFields}>
-                        <RotateCcw className="size-4" /> Clear
+                      <Button type="button" size="xl" variant="outline" className="min-w-0" onClick={clearFields}>
+                        <RotateCcw className="size-4 shrink-0" /> <span className="truncate">Clear</span>
                       </Button>
                     </div>
                   </div>
