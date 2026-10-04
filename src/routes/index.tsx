@@ -835,6 +835,45 @@ function SiteFooter() {
   );
 }
 
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Image failed to load"));
+    img.src = src;
+  });
+}
+
+async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): Promise<string> {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return qrUrl;
+
+  const qrImg = await loadImage(qrUrl);
+  ctx.drawImage(qrImg, 0, 0, size, size);
+
+  const logoImg = await loadImage(logoUrl);
+  const box = Math.round(size * 0.22);
+  const pad = Math.round(box * 0.16);
+  const radius = Math.round(box * 0.24);
+  const x = (size - box) / 2;
+  const y = (size - box) / 2;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.roundRect(x - pad, y - pad, box + pad * 2, box + pad * 2, radius);
+  ctx.fill();
+
+  const scale = Math.min(box / logoImg.width, box / logoImg.height);
+  const w = logoImg.width * scale;
+  const h = logoImg.height * scale;
+  ctx.drawImage(logoImg, x + (box - w) / 2, y + (box - h) / 2, w, h);
+
+  return canvas.toDataURL("image/png");
+}
+
 function buildPayload(qrType: QrType, form: FormState) {
   if (qrType === "url") {
     const normalized = normalizeUrl(form.url);
