@@ -169,8 +169,8 @@ function PixelTagHome() {
 
     QRCode.toDataURL(qrPayload, {
       width: qrSize,
-      margin: 2,
-      errorCorrectionLevel: quality,
+      margin: logoDataUrl ? 4 : 2,
+      errorCorrectionLevel: logoDataUrl ? "H" : quality,
       color: {
         dark: qrColor,
         light: backgroundColor,
@@ -245,10 +245,10 @@ function PixelTagHome() {
     reader.onload = () => {
       setLogoDataUrl(String(reader.result));
       setLogoName(file.name);
-      if (quality === "L" || quality === "M") {
-        setQuality("H");
-        toast("Quality raised to Max so the code still scans with a logo");
+      if (quality !== "H") {
+        toast("Quality locked to Max so the code still scans with a logo");
       }
+      setQuality("H");
     };
     reader.onerror = () => toast.error("Could not read that image");
     reader.readAsDataURL(file);
@@ -384,6 +384,8 @@ function PixelTagHome() {
                             type="button"
                             role="radio"
                             aria-checked={quality === level.value}
+                            disabled={!!logoDataUrl}
+                            title={logoDataUrl ? "Locked to Max while a logo is added" : undefined}
                             variant={quality === level.value ? "brand" : "soft"}
                             className="h-auto min-w-0 flex-col gap-0.5 px-2 py-2.5 text-xs"
                             onClick={() => setQuality(level.value)}
@@ -852,11 +854,13 @@ async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): 
   if (!ctx) return qrUrl;
 
   const qrImg = await loadImage(qrUrl);
+  ctx.imageSmoothingEnabled = false;
   ctx.drawImage(qrImg, 0, 0, size, size);
+  ctx.imageSmoothingEnabled = true;
 
   const logoImg = await loadImage(logoUrl);
-  const box = Math.round(size * 0.22);
-  const pad = Math.round(box * 0.16);
+  const box = Math.round(size * 0.18);
+  const pad = Math.round(box * 0.1);
   const radius = Math.round(box * 0.24);
   const x = (size - box) / 2;
   const y = (size - box) / 2;
