@@ -258,10 +258,8 @@ function PixelTagHome() {
     reader.onload = () => {
       setLogoDataUrl(String(reader.result));
       setLogoName(file.name);
-      if (quality !== "H") {
-        showToast("Quality locked to Max so the code still scans with a logo");
-      }
       setQuality("H");
+      showToast("Quality locked to Max so the code still scans with a logo");
     };
     reader.onerror = () => showToast("Could not read that image", "error");
     reader.readAsDataURL(file);
