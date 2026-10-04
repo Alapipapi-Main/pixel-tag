@@ -854,11 +854,13 @@ async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): 
   if (!ctx) return qrUrl;
 
   const qrImg = await loadImage(qrUrl);
+  ctx.imageSmoothingEnabled = false;
   ctx.drawImage(qrImg, 0, 0, size, size);
+  ctx.imageSmoothingEnabled = true;
 
   const logoImg = await loadImage(logoUrl);
-  const box = Math.round(size * 0.22);
-  const pad = Math.round(box * 0.16);
+  const box = Math.round(size * 0.18);
+  const pad = Math.round(box * 0.1);
   const radius = Math.round(box * 0.24);
   const x = (size - box) / 2;
   const y = (size - box) / 2;
