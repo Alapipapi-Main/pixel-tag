@@ -6,6 +6,7 @@ import {
   Copy,
   Download,
   Globe2,
+  ImagePlus,
   Mail,
   Moon,
   Palette,
@@ -14,11 +15,12 @@ import {
   RotateCcw,
   Sparkles,
   Sun,
+  Trash2,
   Type,
   Wifi,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
