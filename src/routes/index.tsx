@@ -127,6 +127,19 @@ const qualityLevels: { value: QualityLevel; label: string; recovery: string }[] 
   { value: "H", label: "Max", recovery: "30%" },
 ];
 
+let toastSequence = 0;
+
+function showToast(message: string, variant: "default" | "error" | "success" = "default") {
+  const options = { id: `pixel-tag-${++toastSequence}` };
+  if (variant === "error") {
+    toast.error(message, options);
+  } else if (variant === "success") {
+    toast.success(message, options);
+  } else {
+    toast(message, options);
+  }
+}
+
 function PixelTagHome() {
   const [qrType, setQrType] = useState<QrType>("url");
   const [form, setForm] = useState<FormState>(defaultForm);
@@ -206,19 +219,19 @@ function PixelTagHome() {
 
   const copyPayload = async () => {
     if (!qrPayload || !validation.valid) {
-      toast.error(validation.message);
+      showToast(validation.message, "error");
       return;
     }
 
     await navigator.clipboard.writeText(qrPayload);
     setCopied(true);
-    toast.success("Content copied");
+    showToast("Content copied", "success");
     window.setTimeout(() => setCopied(false), 1400);
   };
 
   const downloadQr = () => {
     if (!qrDataUrl) {
-      toast.error(validation.message);
+      showToast(validation.message, "error");
       return;
     }
 
@@ -228,17 +241,17 @@ function PixelTagHome() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    toast.success("PNG downloaded");
+    showToast("PNG downloaded", "success");
   };
 
   const handleLogoFile = (file: File | undefined) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file");
+      showToast("Please choose an image file", "error");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be under 2 MB");
+      showToast("Image must be under 2 MB", "error");
       return;
     }
     const reader = new FileReader();
@@ -246,11 +259,11 @@ function PixelTagHome() {
       setLogoDataUrl(String(reader.result));
       setLogoName(file.name);
       if (quality !== "H") {
-        toast("Quality locked to Max so the code still scans with a logo");
+        showToast("Quality locked to Max so the code still scans with a logo");
       }
       setQuality("H");
     };
-    reader.onerror = () => toast.error("Could not read that image");
+    reader.onerror = () => showToast("Could not read that image", "error");
     reader.readAsDataURL(file);
   };
 
@@ -272,7 +285,7 @@ function PixelTagHome() {
 
   const clearFields = () => {
     resetAll();
-    toast("Fields cleared");
+    showToast("Fields cleared");
   };
 
   return (
