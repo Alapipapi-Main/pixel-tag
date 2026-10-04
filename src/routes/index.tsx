@@ -134,9 +134,12 @@ function PixelTagHome() {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(320);
   const [quality, setQuality] = useState<QualityLevel>("M");
+  const [logoDataUrl, setLogoDataUrl] = useState("");
+  const [logoName, setLogoName] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [copied, setCopied] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem("pixeltag-theme");
@@ -173,10 +176,18 @@ function PixelTagHome() {
         light: backgroundColor,
       },
     })
-      .then((url) => {
-        if (!cancelled) {
-          setQrDataUrl(url);
+      .then(async (url) => {
+        if (cancelled) return;
+        if (logoDataUrl) {
+          try {
+            const composed = await composeQrWithLogo(url, logoDataUrl, qrSize);
+            if (!cancelled) setQrDataUrl(composed);
+            return;
+          } catch {
+            // fall through to the plain code
+          }
         }
+        setQrDataUrl(url);
       })
       .catch(() => {
         if (!cancelled) {
@@ -187,7 +198,7 @@ function PixelTagHome() {
     return () => {
       cancelled = true;
     };
-  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, validation.valid]);
+  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, logoDataUrl, validation.valid]);
 
   const updateForm = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
