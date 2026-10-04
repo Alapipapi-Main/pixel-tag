@@ -4,8 +4,7 @@ Create QR codes in seconds.
 
 Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and download a scan-ready PNG. The live preview updates as you type.
 
-**Live app:** [https://pixel-tag.lovable.app/](https://pixel-tag.lovable.app/)  
-**Repository:** [https://github.com/Alapipapi-Main/pixel-tag](https://github.com/Alapipapi-Main/pixel-tag)
+**Live app:** [https://pixel-tag.lovable.app/](https://pixel-tag.lovable.app/)
 
 ## Features
 
@@ -82,24 +81,7 @@ src/assets/      images, including the logo
 src/components/  UI components
 src/routes/      file-based routes
 src/styles.css   global styles
-roadmap.md       planned updates
 ```
-
-## Roadmap
-
-Already shipped: the base generator, validation, dark/light mode, responsive layout, SEO, and the QR quality picker.
-
-Planned next:
-
-- Logo in the center of the QR code
-- History of recently generated codes, stored on the device only
-- More types: vCard, SMS, and WhatsApp link
-- SVG and JPG download, plus copy image
-- Frame styles with a caption
-- Scan tracking with short links
-- Batch generation from CSV
-
-See [roadmap.md](roadmap.md) for the full sequence.
 
 ## Contributing
 
