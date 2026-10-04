@@ -231,12 +231,42 @@ function PixelTagHome() {
     toast.success("PNG downloaded");
   };
 
+  const handleLogoFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2 MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setLogoDataUrl(String(reader.result));
+      setLogoName(file.name);
+      if (quality === "L" || quality === "M") {
+        setQuality("H");
+        toast("Quality raised to Max so the code still scans with a logo");
+      }
+    };
+    reader.onerror = () => toast.error("Could not read that image");
+    reader.readAsDataURL(file);
+  };
+
+  const removeLogo = () => {
+    setLogoDataUrl("");
+    setLogoName("");
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
   const resetAll = () => {
     setForm(defaultForm);
     setQrColor("#0f172a");
     setBackgroundColor("#ffffff");
     setQrSize(320);
     setQuality("M");
+    removeLogo();
     setCopied(false);
   };
 
@@ -363,6 +393,45 @@ function PixelTagHome() {
                           </Button>
                         ))}
                       </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                        <span className="text-base font-semibold">Center logo</span>
+                        {logoDataUrl ? (
+                          <Button type="button" variant="soft" size="sm" className="shrink-0" onClick={removeLogo}>
+                            <Trash2 className="size-4" /> Remove
+                          </Button>
+                        ) : null}
+                      </div>
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => handleLogoFile(event.target.files?.[0])}
+                      />
+                      {logoDataUrl ? (
+                        <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-xl border border-border bg-card p-3">
+                          <img src={logoDataUrl} alt="Uploaded logo" className="size-12 shrink-0 rounded-lg object-contain" />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-foreground">{logoName}</p>
+                            <p className="text-xs text-muted-foreground">Shown in the middle of your code</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="mt-4 w-full border-dashed"
+                          onClick={() => logoInputRef.current?.click()}
+                        >
+                          <ImagePlus className="size-4" /> Upload a logo or image
+                        </Button>
+                      )}
+                      <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                        A logo covers part of the code, so Pixel Tag uses Max quality automatically to keep it scannable.
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
