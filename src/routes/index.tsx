@@ -6,6 +6,7 @@ import {
   Copy,
   Download,
   Globe2,
+  ImagePlus,
   Mail,
   Moon,
   Palette,
@@ -14,11 +15,12 @@ import {
   RotateCcw,
   Sparkles,
   Sun,
+  Trash2,
   Type,
   Wifi,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -132,9 +134,12 @@ function PixelTagHome() {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(320);
   const [quality, setQuality] = useState<QualityLevel>("M");
+  const [logoDataUrl, setLogoDataUrl] = useState("");
+  const [logoName, setLogoName] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [copied, setCopied] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem("pixeltag-theme");
@@ -171,10 +176,18 @@ function PixelTagHome() {
         light: backgroundColor,
       },
     })
-      .then((url) => {
-        if (!cancelled) {
-          setQrDataUrl(url);
+      .then(async (url) => {
+        if (cancelled) return;
+        if (logoDataUrl) {
+          try {
+            const composed = await composeQrWithLogo(url, logoDataUrl, qrSize);
+            if (!cancelled) setQrDataUrl(composed);
+            return;
+          } catch {
+            // fall through to the plain code
+          }
         }
+        setQrDataUrl(url);
       })
       .catch(() => {
         if (!cancelled) {
@@ -185,7 +198,7 @@ function PixelTagHome() {
     return () => {
       cancelled = true;
     };
-  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, validation.valid]);
+  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, logoDataUrl, validation.valid]);
 
   const updateForm = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -218,12 +231,42 @@ function PixelTagHome() {
     toast.success("PNG downloaded");
   };
 
+  const handleLogoFile = (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2 MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setLogoDataUrl(String(reader.result));
+      setLogoName(file.name);
+      if (quality === "L" || quality === "M") {
+        setQuality("H");
+        toast("Quality raised to Max so the code still scans with a logo");
+      }
+    };
+    reader.onerror = () => toast.error("Could not read that image");
+    reader.readAsDataURL(file);
+  };
+
+  const removeLogo = () => {
+    setLogoDataUrl("");
+    setLogoName("");
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
   const resetAll = () => {
     setForm(defaultForm);
     setQrColor("#0f172a");
     setBackgroundColor("#ffffff");
     setQrSize(320);
     setQuality("M");
+    removeLogo();
     setCopied(false);
   };
 
@@ -350,6 +393,45 @@ function PixelTagHome() {
                           </Button>
                         ))}
                       </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                        <span className="text-base font-semibold">Center logo</span>
+                        {logoDataUrl ? (
+                          <Button type="button" variant="soft" size="sm" className="shrink-0" onClick={removeLogo}>
+                            <Trash2 className="size-4" /> Remove
+                          </Button>
+                        ) : null}
+                      </div>
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => handleLogoFile(event.target.files?.[0])}
+                      />
+                      {logoDataUrl ? (
+                        <div className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-xl border border-border bg-card p-3">
+                          <img src={logoDataUrl} alt="Uploaded logo" className="size-12 shrink-0 rounded-lg object-contain" />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-foreground">{logoName}</p>
+                            <p className="text-xs text-muted-foreground">Shown in the middle of your code</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="mt-4 w-full border-dashed"
+                          onClick={() => logoInputRef.current?.click()}
+                        >
+                          <ImagePlus className="size-4" /> Upload a logo or image
+                        </Button>
+                      )}
+                      <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                        A logo covers part of the code, so Pixel Tag uses Max quality automatically to keep it scannable.
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
@@ -751,6 +833,45 @@ function SiteFooter() {
       <p>No sign-up. No waiting. Just clean QR codes.</p>
     </footer>
   );
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Image failed to load"));
+    img.src = src;
+  });
+}
+
+async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): Promise<string> {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return qrUrl;
+
+  const qrImg = await loadImage(qrUrl);
+  ctx.drawImage(qrImg, 0, 0, size, size);
+
+  const logoImg = await loadImage(logoUrl);
+  const box = Math.round(size * 0.22);
+  const pad = Math.round(box * 0.16);
+  const radius = Math.round(box * 0.24);
+  const x = (size - box) / 2;
+  const y = (size - box) / 2;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.roundRect(x - pad, y - pad, box + pad * 2, box + pad * 2, radius);
+  ctx.fill();
+
+  const scale = Math.min(box / logoImg.width, box / logoImg.height);
+  const w = logoImg.width * scale;
+  const h = logoImg.height * scale;
+  ctx.drawImage(logoImg, x + (box - w) / 2, y + (box - h) / 2, w, h);
+
+  return canvas.toDataURL("image/png");
 }
 
 function buildPayload(qrType: QrType, form: FormState) {
