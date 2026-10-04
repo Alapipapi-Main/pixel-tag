@@ -10,8 +10,8 @@ Numbered update sequence, continuing across sessions. Show only a few numbers at
 - 8 (medium): Batch generation from CSV
 
 ## Shown to user (batch 1)
-- 1 (small): Error-correction level picker (L/M/Q/H)
-- 2 (medium): Logo in QR center (image upload)
+- 1 (small): Error-correction level picker (L/M/Q/H) — DONE
+- 2 (medium): Logo in QR center (image upload) — DONE
 - 3 (small): History of recently generated codes (device only)
 
 ## Done
