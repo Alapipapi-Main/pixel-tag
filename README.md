@@ -92,7 +92,3 @@ Issues and small pull requests are welcome, especially around scan reliability, 
 3. Open a pull request describing what changed and how to test it.
 
 Changes pushed to `main` sync back into Lovable.
-
-## License
-
-No license file is published yet. All rights reserved until one is added.
