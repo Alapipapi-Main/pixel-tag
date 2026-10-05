@@ -1169,6 +1169,10 @@ function HistoryPanel({
                   {qrTypes.find((t) => t.value === entry.qrType)?.label ?? entry.qrType}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">{entry.summary}</p>
+                <p className="text-[0.7rem] text-muted-foreground">
+                  Size: {entry.qrSize} x {entry.qrSize} px{" | "}
+                  Quality: {qualityLevels.find((level) => level.value === entry.quality)?.label ?? entry.quality}
+                </p>
                 <p className="text-[0.7rem] text-muted-foreground">{new Date(entry.createdAt).toLocaleDateString()}</p>
               </button>
               <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0" onClick={() => onRemove(entry.id)} aria-label="Remove from history">
