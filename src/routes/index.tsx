@@ -789,7 +789,7 @@ function PreviewPanel({
   qrType: QrType;
 }) {
   return (
-    <aside className="min-w-0 rounded-2xl border border-border/80 bg-surface-strong/90 p-4 sm:p-5">
+    <aside className="min-w-0 rounded-2xl border border-border/80 bg-surface-strong/90 p-4 sm:p-5 lg:sticky lg:top-4 lg:self-start">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-brand">Preview</p>
