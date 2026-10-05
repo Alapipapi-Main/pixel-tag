@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  History,
+  X,
   AtSign,
   Check,
   Clipboard,
@@ -37,6 +39,22 @@ import { cn } from "@/lib/utils";
 type QrType = "url" | "text" | "wifi" | "email" | "phone";
 type WifiSecurity = "WPA" | "SAE" | "WEP" | "nopass";
 type ThemeMode = "light" | "dark";
+
+const HISTORY_KEY = "pixeltag-history";
+const HISTORY_LIMIT = 8;
+
+type HistoryEntry = {
+  id: string;
+  createdAt: number;
+  qrType: QrType;
+  form: FormState;
+  qrColor: string;
+  backgroundColor: string;
+  qrSize: number;
+  quality: "L" | "M" | "Q" | "H";
+  summary: string;
+  thumb: string;
+};
 
 type FormState = {
   url: string;
@@ -153,6 +171,18 @@ function PixelTagHome() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [copied, setCopied] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(HISTORY_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) setHistory(parsed.slice(0, HISTORY_LIMIT));
+    } catch {
+      // ignore broken history
+    }
+  }, []);
+
 
   useEffect(() => {
     const storedTheme = window.localStorage.getItem("pixeltag-theme");
@@ -229,6 +259,57 @@ function PixelTagHome() {
     window.setTimeout(() => setCopied(false), 1400);
   };
 
+  const saveHistory = (next: HistoryEntry[]) => {
+    setHistory(next);
+    try {
+      window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    } catch {
+      // storage full or blocked; keep in memory only
+    }
+  };
+
+  const addToHistory = async () => {
+    try {
+      const thumb = await QRCode.toDataURL(qrPayload, {
+        width: 96,
+        margin: 1,
+        errorCorrectionLevel: quality,
+        color: { dark: qrColor, light: backgroundColor },
+      });
+      const entry: HistoryEntry = {
+        id: `${Date.now()}`,
+        createdAt: Date.now(),
+        qrType,
+        form,
+        qrColor,
+        backgroundColor,
+        qrSize,
+        quality,
+        summary: qrPayload.slice(0, 80),
+        thumb,
+      };
+      const rest = history.filter(
+        (item) => !(item.qrType === qrType && item.summary === entry.summary && item.qrColor === qrColor && item.backgroundColor === backgroundColor),
+      );
+      saveHistory([entry, ...rest].slice(0, HISTORY_LIMIT));
+    } catch {
+      // history is optional
+    }
+  };
+
+  const restoreHistory = (entry: HistoryEntry) => {
+    removeLogo();
+    setQrType(entry.qrType);
+    setForm({ ...defaultForm, ...entry.form });
+    setQrColor(entry.qrColor);
+    setBackgroundColor(entry.backgroundColor);
+    setQrSize(entry.qrSize);
+    setQuality(entry.quality);
+    setCopied(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    showToast("Code restored from history", "success");
+  };
+
   const downloadQr = () => {
     if (!qrDataUrl) {
       showToast(validation.message, "error");
@@ -242,6 +323,7 @@ function PixelTagHome() {
     link.click();
     link.remove();
     showToast("PNG downloaded", "success");
+    void addToHistory();
   };
 
   const handleLogoFile = (file: File | undefined) => {
@@ -472,6 +554,16 @@ function PixelTagHome() {
               </div>
             </div>
           </section>
+
+          <HistoryPanel
+            history={history}
+            onRestore={restoreHistory}
+            onRemove={(id) => saveHistory(history.filter((item) => item.id !== id))}
+            onClearAll={() => {
+              saveHistory([]);
+              showToast("History cleared");
+            }}
+          />
         </main>
 
         <SiteFooter />
