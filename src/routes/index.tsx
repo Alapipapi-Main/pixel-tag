@@ -1158,7 +1158,7 @@ function HistoryPanel({
           No codes yet. Download a code and it will show up here.
         </p>
       ) : (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+        <ul className="mt-4 grid max-h-80 gap-3 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 xl:grid-cols-1">
           {history.map((entry) => (
             <li key={entry.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-surface p-2.5">
               <button type="button" onClick={() => onRestore(entry)} className="shrink-0 rounded-lg" aria-label="Restore this code">
