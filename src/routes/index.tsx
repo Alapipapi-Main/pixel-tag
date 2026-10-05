@@ -284,8 +284,7 @@ function PixelTagHome() {
         quality,
         summary: qrPayload.slice(0, 80),
         thumb: qrDataUrl,
-        logoDataUrl: logoDataUrl || undefined,
-        logoName: logoName || undefined,
+        ...(logoDataUrl ? { logoDataUrl, logoName } : {}),
       };
       const rest = history.filter(
         (item) =>
