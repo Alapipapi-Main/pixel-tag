@@ -54,6 +54,8 @@ type HistoryEntry = {
   quality: "L" | "M" | "Q" | "H";
   summary: string;
   thumb: string;
+  logoDataUrl?: string;
+  logoName?: string;
 };
 
 type FormState = {
@@ -171,6 +173,7 @@ function PixelTagHome() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [copied, setCopied] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const generatorRef = useRef<HTMLDivElement>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
@@ -268,16 +271,10 @@ function PixelTagHome() {
     }
   };
 
-  const addToHistory = async () => {
+  const addToHistory = () => {
     try {
-      const thumb = await QRCode.toDataURL(qrPayload, {
-        width: 96,
-        margin: 1,
-        errorCorrectionLevel: quality,
-        color: { dark: qrColor, light: backgroundColor },
-      });
       const entry: HistoryEntry = {
-        id: `${Date.now()}`,
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         createdAt: Date.now(),
         qrType,
         form,
@@ -286,10 +283,21 @@ function PixelTagHome() {
         qrSize,
         quality,
         summary: qrPayload.slice(0, 80),
-        thumb,
+        thumb: qrDataUrl,
+        logoDataUrl: logoDataUrl || undefined,
+        logoName: logoName || undefined,
       };
       const rest = history.filter(
-        (item) => !(item.qrType === qrType && item.summary === entry.summary && item.qrColor === qrColor && item.backgroundColor === backgroundColor),
+        (item) =>
+          !(
+            item.qrType === qrType &&
+            JSON.stringify(item.form) === JSON.stringify(form) &&
+            item.qrColor === qrColor &&
+            item.backgroundColor === backgroundColor &&
+            item.qrSize === qrSize &&
+            item.quality === quality &&
+            (item.logoDataUrl ?? "") === logoDataUrl
+          ),
       );
       saveHistory([entry, ...rest].slice(0, HISTORY_LIMIT));
     } catch {
@@ -298,15 +306,17 @@ function PixelTagHome() {
   };
 
   const restoreHistory = (entry: HistoryEntry) => {
-    removeLogo();
     setQrType(entry.qrType);
     setForm({ ...defaultForm, ...entry.form });
     setQrColor(entry.qrColor);
     setBackgroundColor(entry.backgroundColor);
     setQrSize(entry.qrSize);
     setQuality(entry.quality);
+    setLogoDataUrl(entry.logoDataUrl ?? "");
+    setLogoName(entry.logoName ?? "");
+    if (logoInputRef.current) logoInputRef.current.value = "";
     setCopied(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    generatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     showToast("Code restored from history", "success");
   };
 
@@ -323,7 +333,7 @@ function PixelTagHome() {
     link.click();
     link.remove();
     showToast("PNG downloaded", "success");
-    void addToHistory();
+    addToHistory();
   };
 
   const handleLogoFile = (file: File | undefined) => {
@@ -337,11 +347,16 @@ function PixelTagHome() {
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => {
-      setLogoDataUrl(String(reader.result));
-      setLogoName(file.name);
-      setQuality("H");
-      showToast("Quality locked to Max so the code still scans with a logo");
+    reader.onload = async () => {
+      try {
+        const preparedLogo = await prepareLogoDataUrl(String(reader.result));
+        setLogoDataUrl(preparedLogo);
+        setLogoName(file.name);
+        setQuality("H");
+        showToast("Quality locked to Max so the code still scans with a logo");
+      } catch {
+        showToast("Could not prepare that image", "error");
+      }
     };
     reader.onerror = () => showToast("Could not read that image", "error");
     reader.readAsDataURL(file);
@@ -375,9 +390,20 @@ function PixelTagHome() {
 
         <main className="mx-auto flex w-full max-w-7xl flex-col items-center px-4 pb-10 pt-5 sm:px-6 lg:px-8">
           <section className="grid min-h-[calc(100vh-8rem)] w-full items-center gap-8 py-6 xl:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.28fr)] xl:py-10">
-            <BrandPanel />
+            <div className="min-w-0 space-y-6">
+              <BrandPanel />
+              <HistoryPanel
+                history={history}
+                onRestore={restoreHistory}
+                onRemove={(id) => saveHistory(history.filter((item) => item.id !== id))}
+                onClearAll={() => {
+                  saveHistory([]);
+                  showToast("History cleared");
+                }}
+              />
+            </div>
 
-            <div className="min-w-0 animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
+            <div ref={generatorRef} className="min-w-0 scroll-mt-4 animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
               <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
                 <section className="min-w-0 rounded-2xl border border-border/80 bg-surface-strong/80 p-4 sm:p-5">
                   <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
@@ -555,15 +581,6 @@ function PixelTagHome() {
             </div>
           </section>
 
-          <HistoryPanel
-            history={history}
-            onRestore={restoreHistory}
-            onRemove={(id) => saveHistory(history.filter((item) => item.id !== id))}
-            onClearAll={() => {
-              saveHistory([]);
-              showToast("History cleared");
-            }}
-          />
         </main>
 
         <SiteFooter />
@@ -949,6 +966,21 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+async function prepareLogoDataUrl(source: string): Promise<string> {
+  const image = await loadImage(source);
+  const maxSide = 256;
+  const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) return source;
+  context.drawImage(image, 0, 0, width, height);
+  return canvas.toDataURL("image/png");
+}
+
 async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): Promise<string> {
   const canvas = document.createElement("canvas");
   canvas.width = size;
@@ -1127,7 +1159,7 @@ function HistoryPanel({
           No codes yet. Download a code and it will show up here.
         </p>
       ) : (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
           {history.map((entry) => (
             <li key={entry.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-surface p-2.5">
               <button type="button" onClick={() => onRestore(entry)} className="shrink-0 rounded-lg" aria-label="Restore this code">
