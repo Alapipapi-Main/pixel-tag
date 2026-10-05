@@ -15,7 +15,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Error-correction / quality picker: Low (~7%), Medium (~15%), High (~25%), Max (~30%)
 - Optional center logo: upload an image to place inside the code (quality is locked to Max while a logo is added, with a wider quiet zone and a compact logo area so scanner apps read it reliably)
 - Download as PNG
-- Recent codes: the last 8 downloaded codes are saved on your device only; tap one to restore it, remove single items or clear all
+- Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected
 - Copy the entered content
 - Clear all fields
 - Input validation (URL, Wi-Fi, email, and phone)

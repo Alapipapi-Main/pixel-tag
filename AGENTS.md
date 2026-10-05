@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep multi-item responsive rows on a grid with shrinkable text columns and fixed controls to prevent narrow-screen overlap.
+- Store recent QR variants by their complete visual configuration and keep uploaded logos compact so device history stays restorable without a backend.
