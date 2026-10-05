@@ -12,7 +12,7 @@ Numbered update sequence, continuing across sessions. Show only a few numbers at
 ## Shown to user (batch 1)
 - 1 (small): Error-correction level picker (L/M/Q/H) — DONE
 - 2 (medium): Logo in QR center (image upload) — DONE
-- 3 (small): History of recently generated codes (device only)
+- 3 (small): History of recently generated codes (device only) — DONE
 
 ## Done
 - Base app: QR generator (URL, Text, Wi-Fi, Email, Phone), live preview, colors, size, PNG download, copy, clear, dark/light, responsive, SEO, og image, validation

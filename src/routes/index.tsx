@@ -1094,3 +1094,59 @@ function normalizePhone(value: string) {
   }
   return cleaned;
 }
+
+function HistoryPanel({
+  history,
+  onRestore,
+  onRemove,
+  onClearAll,
+}: {
+  history: HistoryEntry[];
+  onRestore: (entry: HistoryEntry) => void;
+  onRemove: (id: string) => void;
+  onClearAll: () => void;
+}) {
+  return (
+    <section className="w-full animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-4 shadow-soft backdrop-blur-xl sm:p-5" aria-label="Recent codes">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 font-display text-lg font-bold text-foreground">
+            <History className="size-5 shrink-0 text-brand" /> <span className="truncate">Recent codes</span>
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">Saved on this device only when you download.</p>
+        </div>
+        {history.length > 0 && (
+          <Button type="button" variant="soft" size="sm" className="shrink-0" onClick={onClearAll}>
+            <Trash2 className="size-4" /> Clear all
+          </Button>
+        )}
+      </div>
+
+      {history.length === 0 ? (
+        <p className="mt-4 rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          No codes yet. Download a code and it will show up here.
+        </p>
+      ) : (
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {history.map((entry) => (
+            <li key={entry.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-surface p-2.5">
+              <button type="button" onClick={() => onRestore(entry)} className="shrink-0 rounded-lg" aria-label="Restore this code">
+                <img src={entry.thumb} alt="" width={56} height={56} className="size-14 rounded-lg" />
+              </button>
+              <button type="button" onClick={() => onRestore(entry)} className="min-w-0 text-left">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {qrTypes.find((t) => t.value === entry.qrType)?.label ?? entry.qrType}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{entry.summary}</p>
+                <p className="text-[0.7rem] text-muted-foreground">{new Date(entry.createdAt).toLocaleDateString()}</p>
+              </button>
+              <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0" onClick={() => onRemove(entry.id)} aria-label="Remove from history">
+                <X className="size-4" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
