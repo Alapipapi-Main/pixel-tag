@@ -3,11 +3,13 @@
 Numbered update sequence, continuing across sessions. Show only a few numbers at a time in chat; when the visible batch is exhausted, propose/request the next batch from the user.
 
 ## Up next (not yet shown or done)
-- 4 (medium): More QR types — vCard contact, SMS, WhatsApp link
-- 5 (small): Download as SVG + JPG, copy image to clipboard
-- 6 (medium): Frame styles with caption ("SCAN ME")
 - 7 (big): Scan tracking with short links (needs backend)
 - 8 (medium): Batch generation from CSV
+
+## Shown to user (batch 2)
+- 4 (medium): More QR types — vCard contact, SMS, WhatsApp link — DONE
+- 5 (small): Download as SVG + JPG, copy image to clipboard
+- 6 (medium): Frame styles with caption ("SCAN ME")
 
 ## Shown to user (batch 1)
 - 1 (small): Error-correction level picker (L/M/Q/H) — DONE

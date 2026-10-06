@@ -5,11 +5,14 @@ import {
   AtSign,
   Check,
   Clipboard,
+  Contact,
   Copy,
   Download,
   Globe2,
   ImagePlus,
   Mail,
+  MessageCircle,
+  MessageSquare,
   Moon,
   Palette,
   Phone,
@@ -36,7 +39,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import pixeltagLogo from "@/assets/pixeltag-logo.png";
 import { cn } from "@/lib/utils";
 
-type QrType = "url" | "text" | "wifi" | "email" | "phone";
+type QrType = "url" | "text" | "wifi" | "email" | "phone" | "vcard" | "sms" | "whatsapp";
 type WifiSecurity = "WPA" | "SAE" | "WEP" | "nopass";
 type ThemeMode = "light" | "dark";
 
@@ -69,6 +72,16 @@ type FormState = {
   emailSubject: string;
   emailBody: string;
   phone: string;
+  vcardFirstName: string;
+  vcardLastName: string;
+  vcardPhone: string;
+  vcardEmail: string;
+  vcardOrg: string;
+  vcardUrl: string;
+  smsPhone: string;
+  smsMessage: string;
+  whatsappPhone: string;
+  whatsappMessage: string;
 };
 
 const defaultForm: FormState = {
@@ -82,6 +95,16 @@ const defaultForm: FormState = {
   emailSubject: "",
   emailBody: "",
   phone: "",
+  vcardFirstName: "",
+  vcardLastName: "",
+  vcardPhone: "",
+  vcardEmail: "",
+  vcardOrg: "",
+  vcardUrl: "",
+  smsPhone: "",
+  smsMessage: "",
+  whatsappPhone: "",
+  whatsappMessage: "",
 };
 
 const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
@@ -90,6 +113,9 @@ const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
   { value: "wifi", label: "Wi-Fi", icon: Wifi },
   { value: "email", label: "Email", icon: Mail },
   { value: "phone", label: "Phone", icon: Phone },
+  { value: "vcard", label: "Contact", icon: Contact },
+  { value: "sms", label: "SMS", icon: MessageSquare },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
 ];
 
 
@@ -100,7 +126,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create custom QR codes instantly for websites, text, Wi-Fi, email, and phone numbers with Pixel Tag.",
+          "Create custom QR codes instantly for websites, text, Wi-Fi, email, phone numbers, contact cards, SMS, and WhatsApp with Pixel Tag.",
       },
       { property: "og:title", content: "Pixel Tag" },
       {
@@ -130,7 +156,7 @@ export const Route = createFileRoute("/")({
           operatingSystem: "Any",
           url: "https://pixel-tag.lovable.app/",
           description:
-            "Create and customize QR codes for websites, text, Wi-Fi, email, and phone numbers.",
+            "Create and customize QR codes for websites, text, Wi-Fi, email, phone numbers, contact cards, SMS, and WhatsApp.",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }),
       },
@@ -419,7 +445,7 @@ function PixelTagHome() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {qrTypes.map((type) => {
                       const Icon = type.icon;
                       const isActive = qrType === type.value;
@@ -639,12 +665,12 @@ function BrandPanel() {
           Pixel-perfect codes, ready before the moment passes.
         </h1>
         <p className="mx-auto max-w-xl text-base leading-8 text-muted-foreground sm:text-lg xl:mx-0">
-          Generate polished QR codes for links, notes, Wi-Fi access, emails, and phone numbers with precise color and export controls.
+          Generate polished QR codes for links, notes, Wi-Fi access, emails, phone numbers, contact cards, SMS, and WhatsApp with precise color and export controls.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3 xl:max-w-xl">
         {[
-          ["5", "QR types"],
+          ["8", "QR types"],
           ["PNG", "instant export"],
           ["0", "accounts needed"],
         ].map(([value, label]) => (
@@ -794,17 +820,138 @@ function QrFields({
     );
   }
 
+  if (qrType === "phone") {
+    return (
+      <FieldShell id="phone-number" label="Phone number" icon={<Phone className="size-4" />}>
+        <Input
+          id="phone-number"
+          value={form.phone}
+          onChange={(event) => updateForm("phone", event.target.value)}
+          placeholder="+1 555 123 4567"
+          inputMode="tel"
+          autoComplete="tel"
+        />
+      </FieldShell>
+    );
+  }
+
+  if (qrType === "vcard") {
+    return (
+      <div className="grid gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FieldShell id="vcard-first-name" label="First name" icon={<Contact className="size-4" />}>
+            <Input
+              id="vcard-first-name"
+              value={form.vcardFirstName}
+              onChange={(event) => updateForm("vcardFirstName", event.target.value)}
+              placeholder="Ada"
+              autoComplete="given-name"
+            />
+          </FieldShell>
+          <FieldShell id="vcard-last-name" label="Last name" icon={<Contact className="size-4" />}>
+            <Input
+              id="vcard-last-name"
+              value={form.vcardLastName}
+              onChange={(event) => updateForm("vcardLastName", event.target.value)}
+              placeholder="Lovelace"
+              autoComplete="family-name"
+            />
+          </FieldShell>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FieldShell id="vcard-phone" label="Phone" icon={<Phone className="size-4" />}>
+            <Input
+              id="vcard-phone"
+              value={form.vcardPhone}
+              onChange={(event) => updateForm("vcardPhone", event.target.value)}
+              placeholder="+1 555 123 4567"
+              inputMode="tel"
+              autoComplete="tel"
+            />
+          </FieldShell>
+          <FieldShell id="vcard-email" label="Email" icon={<AtSign className="size-4" />}>
+            <Input
+              id="vcard-email"
+              value={form.vcardEmail}
+              onChange={(event) => updateForm("vcardEmail", event.target.value)}
+              placeholder="name@example.com"
+              inputMode="email"
+              autoComplete="email"
+            />
+          </FieldShell>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FieldShell id="vcard-org" label="Company" icon={<Clipboard className="size-4" />}>
+            <Input
+              id="vcard-org"
+              value={form.vcardOrg}
+              onChange={(event) => updateForm("vcardOrg", event.target.value)}
+              placeholder="Company or team"
+              autoComplete="organization"
+            />
+          </FieldShell>
+          <FieldShell id="vcard-url" label="Website" icon={<Globe2 className="size-4" />}>
+            <Input
+              id="vcard-url"
+              value={form.vcardUrl}
+              onChange={(event) => updateForm("vcardUrl", event.target.value)}
+              placeholder="https://example.com"
+              inputMode="url"
+            />
+          </FieldShell>
+        </div>
+      </div>
+    );
+  }
+
+  if (qrType === "sms") {
+    return (
+      <div className="grid gap-4">
+        <FieldShell id="sms-phone" label="Phone number" icon={<Phone className="size-4" />}>
+          <Input
+            id="sms-phone"
+            value={form.smsPhone}
+            onChange={(event) => updateForm("smsPhone", event.target.value)}
+            placeholder="+1 555 123 4567"
+            inputMode="tel"
+            autoComplete="tel"
+          />
+        </FieldShell>
+        <FieldShell id="sms-message" label="Message" icon={<MessageSquare className="size-4" />}>
+          <Textarea
+            id="sms-message"
+            value={form.smsMessage}
+            onChange={(event) => updateForm("smsMessage", event.target.value)}
+            placeholder="Write the text message…"
+            className="min-h-24 resize-none"
+          />
+        </FieldShell>
+      </div>
+    );
+  }
+
   return (
-    <FieldShell id="phone-number" label="Phone number" icon={<Phone className="size-4" />}>
-      <Input
-        id="phone-number"
-        value={form.phone}
-        onChange={(event) => updateForm("phone", event.target.value)}
-        placeholder="+1 555 123 4567"
-        inputMode="tel"
-        autoComplete="tel"
-      />
-    </FieldShell>
+    <div className="grid gap-4">
+      <FieldShell id="whatsapp-phone" label="WhatsApp number" icon={<MessageCircle className="size-4" />}>
+        <Input
+          id="whatsapp-phone"
+          value={form.whatsappPhone}
+          onChange={(event) => updateForm("whatsappPhone", event.target.value)}
+          placeholder="+1 555 123 4567"
+          inputMode="tel"
+          autoComplete="tel"
+        />
+      </FieldShell>
+      <FieldShell id="whatsapp-message" label="Message" icon={<Type className="size-4" />}>
+        <Textarea
+          id="whatsapp-message"
+          value={form.whatsappMessage}
+          onChange={(event) => updateForm("whatsappMessage", event.target.value)}
+          placeholder="Hi! I scanned your code…"
+          className="min-h-24 resize-none"
+        />
+      </FieldShell>
+    </div>
   );
 }
 
@@ -1045,8 +1192,45 @@ function buildPayload(qrType: QrType, form: FormState) {
     return query ? `mailto:${email}?${query}` : `mailto:${email}`;
   }
 
-  const phone = normalizePhone(form.phone);
-  return phone ? `tel:${phone}` : "";
+  if (qrType === "phone") {
+    const phone = normalizePhone(form.phone);
+    return phone ? `tel:${phone}` : "";
+  }
+
+  if (qrType === "vcard") {
+    const first = form.vcardFirstName.trim();
+    const last = form.vcardLastName.trim();
+    if (!first && !last) return "";
+    const lines = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      `N:${escapeVcardValue(last)};${escapeVcardValue(first)};;;`,
+      `FN:${escapeVcardValue([first, last].filter(Boolean).join(" "))}`,
+    ];
+    if (form.vcardOrg.trim()) lines.push(`ORG:${escapeVcardValue(form.vcardOrg.trim())}`);
+    const phone = normalizePhone(form.vcardPhone);
+    if (phone) lines.push(`TEL;TYPE=CELL:${phone}`);
+    if (isValidEmail(form.vcardEmail.trim())) lines.push(`EMAIL:${form.vcardEmail.trim()}`);
+    const site = normalizeUrl(form.vcardUrl);
+    if (site) lines.push(`URL:${site}`);
+    lines.push("END:VCARD");
+    return lines.join("\n");
+  }
+
+  if (qrType === "sms") {
+    const phone = normalizePhone(form.smsPhone);
+    if (!phone) return "";
+    const message = form.smsMessage.trim();
+    return message ? `SMSTO:${phone}:${message}` : `SMSTO:${phone}`;
+  }
+
+  const phone = normalizePhone(form.whatsappPhone);
+  if (!phone) return "";
+  const digits = phone.replace(/^\+/, "");
+  const message = form.whatsappMessage.trim();
+  return message
+    ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
+    : `https://wa.me/${digits}`;
 }
 
 function validateForm(qrType: QrType, form: FormState) {
@@ -1086,10 +1270,40 @@ function validateForm(qrType: QrType, form: FormState) {
     return { valid: true, message: "Email QR code ready." };
   }
 
-  if (!normalizePhone(form.phone)) {
-    return { valid: false, message: "Enter a valid phone number with country code." };
+  if (qrType === "phone") {
+    if (!normalizePhone(form.phone)) {
+      return { valid: false, message: "Enter a valid phone number with country code." };
+    }
+    return { valid: true, message: "Phone QR code ready." };
   }
-  return { valid: true, message: "Phone QR code ready." };
+
+  if (qrType === "vcard") {
+    if (!form.vcardFirstName.trim() && !form.vcardLastName.trim()) {
+      return { valid: false, message: "Enter at least a first or last name." };
+    }
+    if (form.vcardEmail.trim() && !isValidEmail(form.vcardEmail.trim())) {
+      return { valid: false, message: "Enter a valid email address or leave it empty." };
+    }
+    if (form.vcardPhone.trim() && !normalizePhone(form.vcardPhone)) {
+      return { valid: false, message: "Enter a valid phone number with country code or leave it empty." };
+    }
+    if (form.vcardUrl.trim() && !normalizeUrl(form.vcardUrl)) {
+      return { valid: false, message: "Enter a valid website URL or leave it empty." };
+    }
+    return { valid: true, message: "Contact QR code ready." };
+  }
+
+  if (qrType === "sms") {
+    if (!normalizePhone(form.smsPhone)) {
+      return { valid: false, message: "Enter a valid phone number with country code." };
+    }
+    return { valid: true, message: "SMS QR code ready." };
+  }
+
+  if (!normalizePhone(form.whatsappPhone)) {
+    return { valid: false, message: "Enter a valid WhatsApp number with country code." };
+  }
+  return { valid: true, message: "WhatsApp QR code ready." };
 }
 
 function normalizeUrl(value: string) {
@@ -1112,6 +1326,10 @@ function normalizeUrl(value: string) {
 
 function escapeWifiValue(value: string) {
   return value.replace(/([\\;:,\"])/g, "\\$1");
+}
+
+function escapeVcardValue(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
 function isValidEmail(value: string) {

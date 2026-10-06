@@ -8,7 +8,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 
 ## Features
 
-- Five QR types: website URL, text, Wi-Fi, email, and phone
+- Eight QR types: website URL, text, Wi-Fi, email, phone, contact card, SMS, and WhatsApp
 - Live preview
 - Custom QR color and background color, including hex values
 - Size options: Small (192px), default (320×320), and Large (512px)
@@ -18,7 +18,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected
 - Copy the entered content
 - Clear all fields
-- Input validation (URL, Wi-Fi, email, and phone)
+- Input validation (URL, Wi-Fi, email, phone, contact card, SMS, and WhatsApp)
 - Dark and light mode
 - Responsive layout
 - SEO metadata, sitemap, and Open Graph image
@@ -33,6 +33,9 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 | Wi-Fi | Network name, password, and security type |
 | Email | Address, subject, and body |
 | Phone | A phone number |
+| Contact | Name, phone, email, company, and website (vCard) |
+| SMS | Phone number with an optional pre-written message |
+| WhatsApp | WhatsApp number with an optional pre-written message |
 
 Higher error correction helps if the code is printed small or partly covered. It also makes the pattern denser, so keep strong contrast between the QR color and the background.
 
