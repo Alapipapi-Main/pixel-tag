@@ -5,11 +5,14 @@ import {
   AtSign,
   Check,
   Clipboard,
+  Contact,
   Copy,
   Download,
   Globe2,
   ImagePlus,
   Mail,
+  MessageCircle,
+  MessageSquare,
   Moon,
   Palette,
   Phone,
@@ -36,7 +39,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import pixeltagLogo from "@/assets/pixeltag-logo.png";
 import { cn } from "@/lib/utils";
 
-type QrType = "url" | "text" | "wifi" | "email" | "phone";
+type QrType = "url" | "text" | "wifi" | "email" | "phone" | "vcard" | "sms" | "whatsapp";
 type WifiSecurity = "WPA" | "SAE" | "WEP" | "nopass";
 type ThemeMode = "light" | "dark";
 
@@ -69,6 +72,16 @@ type FormState = {
   emailSubject: string;
   emailBody: string;
   phone: string;
+  vcardFirstName: string;
+  vcardLastName: string;
+  vcardPhone: string;
+  vcardEmail: string;
+  vcardOrg: string;
+  vcardUrl: string;
+  smsPhone: string;
+  smsMessage: string;
+  whatsappPhone: string;
+  whatsappMessage: string;
 };
 
 const defaultForm: FormState = {
@@ -82,6 +95,16 @@ const defaultForm: FormState = {
   emailSubject: "",
   emailBody: "",
   phone: "",
+  vcardFirstName: "",
+  vcardLastName: "",
+  vcardPhone: "",
+  vcardEmail: "",
+  vcardOrg: "",
+  vcardUrl: "",
+  smsPhone: "",
+  smsMessage: "",
+  whatsappPhone: "",
+  whatsappMessage: "",
 };
 
 const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
@@ -90,6 +113,9 @@ const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
   { value: "wifi", label: "Wi-Fi", icon: Wifi },
   { value: "email", label: "Email", icon: Mail },
   { value: "phone", label: "Phone", icon: Phone },
+  { value: "vcard", label: "Contact", icon: Contact },
+  { value: "sms", label: "SMS", icon: MessageSquare },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle },
 ];
 
 
@@ -419,7 +445,7 @@ function PixelTagHome() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {qrTypes.map((type) => {
                       const Icon = type.icon;
                       const isActive = qrType === type.value;
