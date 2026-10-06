@@ -126,7 +126,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create custom QR codes instantly for websites, text, Wi-Fi, email, and phone numbers with Pixel Tag.",
+          "Create custom QR codes instantly for websites, text, Wi-Fi, email, phone numbers, contact cards, SMS, and WhatsApp with Pixel Tag.",
       },
       { property: "og:title", content: "Pixel Tag" },
       {
@@ -156,7 +156,7 @@ export const Route = createFileRoute("/")({
           operatingSystem: "Any",
           url: "https://pixel-tag.lovable.app/",
           description:
-            "Create and customize QR codes for websites, text, Wi-Fi, email, and phone numbers.",
+            "Create and customize QR codes for websites, text, Wi-Fi, email, phone numbers, contact cards, SMS, and WhatsApp.",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         }),
       },
@@ -665,12 +665,12 @@ function BrandPanel() {
           Pixel-perfect codes, ready before the moment passes.
         </h1>
         <p className="mx-auto max-w-xl text-base leading-8 text-muted-foreground sm:text-lg xl:mx-0">
-          Generate polished QR codes for links, notes, Wi-Fi access, emails, and phone numbers with precise color and export controls.
+          Generate polished QR codes for links, notes, Wi-Fi access, emails, phone numbers, contact cards, SMS, and WhatsApp with precise color and export controls.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3 xl:max-w-xl">
         {[
-          ["5", "QR types"],
+          ["8", "QR types"],
           ["PNG", "instant export"],
           ["0", "accounts needed"],
         ].map(([value, label]) => (
