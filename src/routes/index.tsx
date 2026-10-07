@@ -193,6 +193,7 @@ function PixelTagHome() {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(320);
   const [quality, setQuality] = useState<QualityLevel>("M");
+  const [format, setFormat] = useState<DownloadFormat>("png");
   const [logoDataUrl, setLogoDataUrl] = useState("");
   const [logoName, setLogoName] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -345,20 +346,57 @@ function PixelTagHome() {
     showToast("Code restored from history", "success");
   };
 
-  const downloadQr = () => {
+  const downloadQr = async () => {
     if (!qrDataUrl) {
       showToast(validation.message, "error");
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = qrDataUrl;
-    link.download = `pixel-tag-${qrType}-${qrSize}.png`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    showToast("PNG downloaded", "success");
-    addToHistory();
+    try {
+      let href = qrDataUrl;
+      let revoke: string | null = null;
+
+      if (format === "jpg") {
+        href = await pngToJpg(qrDataUrl, qrSize, backgroundColor);
+      } else if (format === "svg") {
+        const svg = await buildSvg(qrPayload, {
+          size: qrSize,
+          dark: qrColor,
+          light: backgroundColor,
+          level: logoDataUrl ? "H" : quality,
+          margin: logoDataUrl ? 4 : 2,
+          logoDataUrl: logoDataUrl || null,
+        });
+        href = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+        revoke = href;
+      }
+
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = `pixel-tag-${qrType}-${qrSize}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      if (revoke) URL.revokeObjectURL(revoke);
+      showToast(`${format.toUpperCase()} downloaded`, "success");
+      addToHistory();
+    } catch {
+      showToast("Could not create that file", "error");
+    }
+  };
+
+  const copyImage = async () => {
+    if (!qrDataUrl) {
+      showToast(validation.message, "error");
+      return;
+    }
+    try {
+      const blob = await (await fetch(qrDataUrl)).blob();
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      showToast("QR image copied", "success");
+    } catch {
+      showToast("Copying images is not supported in this browser", "error");
+    }
   };
 
   const handleLogoFile = (file: File | undefined) => {
@@ -399,6 +437,7 @@ function PixelTagHome() {
     setBackgroundColor("#ffffff");
     setQrSize(320);
     setQuality("M");
+    setFormat("png");
     removeLogo();
     setCopied(false);
   };
