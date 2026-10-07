@@ -1227,6 +1227,57 @@ async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): 
   return canvas.toDataURL("image/png");
 }
 
+async function pngToJpg(pngUrl: string, size: number, background: string): Promise<string> {
+  const image = await loadImage(pngUrl);
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return pngUrl;
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, size, size);
+  ctx.drawImage(image, 0, 0, size, size);
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
+
+async function buildSvg(
+  payload: string,
+  options: {
+    size: number;
+    dark: string;
+    light: string;
+    level: QualityLevel;
+    margin: number;
+    logoDataUrl: string | null;
+  },
+): Promise<string> {
+  let svg = await QRCode.toString(payload, {
+    type: "svg",
+    width: options.size,
+    margin: options.margin,
+    errorCorrectionLevel: options.level,
+    color: { dark: options.dark, light: options.light },
+  });
+
+  if (options.logoDataUrl) {
+    const logoImg = await loadImage(options.logoDataUrl);
+    const box = Math.round(options.size * 0.18);
+    const pad = Math.round(box * 0.1);
+    const radius = Math.round(box * 0.24);
+    const x = (options.size - box) / 2;
+    const y = (options.size - box) / 2;
+    const scale = Math.min(box / logoImg.width, box / logoImg.height);
+    const w = logoImg.width * scale;
+    const h = logoImg.height * scale;
+    const insert =
+      `<rect x="${x - pad}" y="${y - pad}" width="${box + pad * 2}" height="${box + pad * 2}" rx="${radius}" fill="#ffffff"/>` +
+      `<image href="${options.logoDataUrl}" x="${x + (box - w) / 2}" y="${y + (box - h) / 2}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"/>`;
+    svg = svg.replace("</svg>", `${insert}</svg>`);
+  }
+
+  return svg;
+}
+
 function buildPayload(qrType: QrType, form: FormState) {
   if (qrType === "url") {
     const normalized = normalizeUrl(form.url);

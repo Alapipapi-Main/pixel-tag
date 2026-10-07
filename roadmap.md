@@ -8,7 +8,7 @@ Numbered update sequence, continuing across sessions. Show only a few numbers at
 
 ## Shown to user (batch 2)
 - 4 (medium): More QR types — vCard contact, SMS, WhatsApp link — DONE
-- 5 (small): Download as SVG + JPG, copy image to clipboard
+- 5 (small): Download as SVG + JPG, copy image to clipboard — DONE
 - 6 (medium): Frame styles with caption ("SCAN ME")
 
 ## Shown to user (batch 1)
