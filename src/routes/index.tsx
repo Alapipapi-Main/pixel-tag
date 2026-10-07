@@ -8,6 +8,7 @@ import {
   Contact,
   Copy,
   Download,
+  FileImage,
   Globe2,
   ImagePlus,
   Mail,
@@ -166,6 +167,7 @@ export const Route = createFileRoute("/")({
 });
 
 type QualityLevel = "L" | "M" | "Q" | "H";
+type DownloadFormat = "png" | "jpg" | "svg";
 const qualityLevels: { value: QualityLevel; label: string; recovery: string }[] = [
   { value: "L", label: "Low", recovery: "7%" },
   { value: "M", label: "Medium", recovery: "15%" },
@@ -619,9 +621,36 @@ function PixelTagHome() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
+                    <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                        <span className="text-base font-semibold">Download format</span>
+                        <span className="shrink-0 text-xs text-muted-foreground sm:text-sm">
+                          {format === "svg" ? "Scalable vector" : format === "jpg" ? "For documents" : "Best for web"}
+                        </span>
+                      </div>
+                      <div className="mt-4 grid grid-cols-3 gap-2" role="radiogroup" aria-label="Download format">
+                        {(["png", "jpg", "svg"] as const).map((option) => (
+                          <Button
+                            key={option}
+                            type="button"
+                            role="radio"
+                            aria-checked={format === option}
+                            variant={format === option ? "brand" : "soft"}
+                            className="min-w-0 px-2 text-xs font-semibold"
+                            onClick={() => setFormat(option)}
+                          >
+                            {option.toUpperCase()}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-4">
                       <Button type="button" size="xl" variant="brand" className="min-w-0 sm:col-span-2 2xl:col-span-1" onClick={downloadQr} disabled={!qrDataUrl}>
-                        <Download className="size-4 shrink-0" /> <span className="truncate">Download PNG</span>
+                        <Download className="size-4 shrink-0" /> <span className="truncate">Download {format.toUpperCase()}</span>
+                      </Button>
+                      <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyImage} disabled={!qrDataUrl}>
+                        <FileImage className="size-4 shrink-0" /> <span className="truncate">Copy image</span>
                       </Button>
                       <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyPayload} disabled={!qrPayload}>
                         {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
