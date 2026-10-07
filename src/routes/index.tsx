@@ -108,6 +108,58 @@ const defaultForm: FormState = {
   whatsappMessage: "",
 };
 
+function isFormState(value: unknown): value is FormState {
+  if (typeof value !== "object" || value === null) return false;
+  const form = value as Partial<FormState>;
+  const textFields: Array<keyof FormState> = [
+    "url",
+    "text",
+    "wifiSsid",
+    "wifiPassword",
+    "email",
+    "emailSubject",
+    "emailBody",
+    "phone",
+    "vcardFirstName",
+    "vcardLastName",
+    "vcardPhone",
+    "vcardEmail",
+    "vcardOrg",
+    "vcardUrl",
+    "smsPhone",
+    "smsMessage",
+    "whatsappPhone",
+    "whatsappMessage",
+  ];
+
+  return (
+    textFields.every((field) => typeof form[field] === "string") &&
+    ["WPA", "SAE", "WEP", "nopass"].includes(form.wifiSecurity ?? "") &&
+    typeof form.wifiHidden === "boolean"
+  );
+}
+
+function isHistoryEntry(value: unknown): value is HistoryEntry {
+  if (typeof value !== "object" || value === null) return false;
+  const entry = value as Partial<HistoryEntry>;
+
+  return (
+    typeof entry.id === "string" &&
+    typeof entry.createdAt === "number" &&
+    Number.isFinite(entry.createdAt) &&
+    qrTypes.some((type) => type.value === entry.qrType) &&
+    isFormState(entry.form) &&
+    typeof entry.qrColor === "string" &&
+    typeof entry.backgroundColor === "string" &&
+    typeof entry.qrSize === "number" &&
+    ["L", "M", "Q", "H"].includes(entry.quality ?? "") &&
+    typeof entry.summary === "string" &&
+    typeof entry.thumb === "string" &&
+    (entry.logoDataUrl === undefined || typeof entry.logoDataUrl === "string") &&
+    (entry.logoName === undefined || typeof entry.logoName === "string")
+  );
+}
+
 const qrTypes: Array<{ value: QrType; label: string; icon: typeof Globe2 }> = [
   { value: "url", label: "Website URL", icon: Globe2 },
   { value: "text", label: "Text", icon: Type },
@@ -209,7 +261,9 @@ function PixelTagHome() {
     try {
       const raw = window.localStorage.getItem(HISTORY_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) setHistory(parsed.slice(0, HISTORY_LIMIT));
+      if (Array.isArray(parsed)) {
+        setHistory(parsed.filter(isHistoryEntry).slice(0, HISTORY_LIMIT));
+      }
     } catch {
       // ignore broken history
     }
