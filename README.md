@@ -14,7 +14,8 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Size options: Small (192px), default (320×320), and Large (512px)
 - Error-correction / quality picker: Low (~7%), Medium (~15%), High (~25%), Max (~30%)
 - Optional center logo: upload an image to place inside the code (quality is locked to Max while a logo is added, with a wider quiet zone and a compact logo area so scanner apps read it reliably)
-- Download as PNG
+- Download as PNG, JPG, or SVG (center logo is embedded in every format)
+- Copy the QR image straight to the clipboard
 - Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected
 - Copy the entered content
 - Clear all fields
