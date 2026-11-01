@@ -194,6 +194,7 @@ function PixelTagHome() {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(320);
   const [quality, setQuality] = useState<QualityLevel>("M");
+  const [downloadFormat, setDownloadFormat] = useState<"png" | "jpg" | "svg">("png");
   const [logoDataUrl, setLogoDataUrl] = useState("");
   const [logoName, setLogoName] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -631,15 +632,30 @@ function PixelTagHome() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
-                      <Button type="button" size="xl" variant="brand" className="min-w-0 sm:col-span-2 2xl:col-span-1" onClick={downloadQr} disabled={!qrDataUrl}>
-                        <Download className="size-4 shrink-0" /> <span className="truncate">Download PNG</span>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-4">
+                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 sm:col-span-2 2xl:col-span-2">
+                        <Button type="button" size="xl" variant="brand" className="min-w-0" onClick={downloadQr} disabled={!qrDataUrl}>
+                          <Download className="size-4 shrink-0" /> <span className="truncate">Download {downloadFormat.toUpperCase()}</span>
+                        </Button>
+                        <Select value={downloadFormat} onValueChange={(value) => setDownloadFormat(value as "png" | "jpg" | "svg")}>
+                          <SelectTrigger className="h-full w-24 shrink-0" aria-label="Download format">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="png">PNG</SelectItem>
+                            <SelectItem value="jpg">JPG</SelectItem>
+                            <SelectItem value="svg">SVG</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyQrImage} disabled={!qrDataUrl}>
+                        <ImageDown className="size-4 shrink-0" /> <span className="truncate">Copy image</span>
                       </Button>
                       <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyPayload} disabled={!qrPayload}>
                         {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
                         <span className="truncate">{copied ? "Copied" : "Copy content"}</span>
                       </Button>
-                      <Button type="button" size="xl" variant="outline" className="min-w-0" onClick={clearFields}>
+                      <Button type="button" size="xl" variant="outline" className="min-w-0 sm:col-span-2 2xl:col-span-4" onClick={clearFields}>
                         <RotateCcw className="size-4 shrink-0" /> <span className="truncate">Clear</span>
                       </Button>
                     </div>
