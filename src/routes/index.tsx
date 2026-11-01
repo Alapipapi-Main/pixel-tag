@@ -9,6 +9,7 @@ import {
   Copy,
   Download,
   Globe2,
+  ImageDown,
   ImagePlus,
   Mail,
   MessageCircle,
@@ -193,6 +194,7 @@ function PixelTagHome() {
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [qrSize, setQrSize] = useState(320);
   const [quality, setQuality] = useState<QualityLevel>("M");
+  const [downloadFormat, setDownloadFormat] = useState<"png" | "jpg" | "svg">("png");
   const [logoDataUrl, setLogoDataUrl] = useState("");
   const [logoName, setLogoName] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -345,20 +347,70 @@ function PixelTagHome() {
     showToast("Code restored from history", "success");
   };
 
-  const downloadQr = () => {
+  const triggerDownload = (href: string, filename: string) => {
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const downloadQr = async () => {
+    if (!qrDataUrl || !qrPayload) {
+      showToast(validation.message, "error");
+      return;
+    }
+
+    const baseName = `pixel-tag-${qrType}-${qrSize}`;
+
+    try {
+      if (downloadFormat === "svg") {
+        const svg = await buildSvgString(qrPayload, {
+          size: qrSize,
+          margin: logoDataUrl ? 4 : 2,
+          errorCorrectionLevel: logoDataUrl ? "H" : quality,
+          dark: qrColor,
+          light: backgroundColor,
+          logoDataUrl,
+        });
+        triggerDownload(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, `${baseName}.svg`);
+        showToast("SVG downloaded", "success");
+      } else if (downloadFormat === "jpg") {
+        const jpg = await pngToJpgDataUrl(qrDataUrl, backgroundColor);
+        triggerDownload(jpg, `${baseName}.jpg`);
+        showToast("JPG downloaded", "success");
+      } else {
+        triggerDownload(qrDataUrl, `${baseName}.png`);
+        showToast("PNG downloaded", "success");
+      }
+      addToHistory();
+    } catch {
+      showToast("Could not create that file", "error");
+    }
+  };
+
+  const copyQrImage = async () => {
     if (!qrDataUrl) {
       showToast(validation.message, "error");
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = qrDataUrl;
-    link.download = `pixel-tag-${qrType}-${qrSize}.png`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    showToast("PNG downloaded", "success");
-    addToHistory();
+    try {
+      const image = await loadImage(qrDataUrl);
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("No canvas");
+      ctx.drawImage(image, 0, 0);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("No image data");
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      showToast("QR image copied — paste it anywhere", "success");
+    } catch {
+      showToast("Your browser blocked image copy — use Download instead", "error");
+    }
   };
 
   const handleLogoFile = (file: File | undefined) => {
@@ -580,9 +632,24 @@ function PixelTagHome() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
-                      <Button type="button" size="xl" variant="brand" className="min-w-0 sm:col-span-2 2xl:col-span-1" onClick={downloadQr} disabled={!qrDataUrl}>
-                        <Download className="size-4 shrink-0" /> <span className="truncate">Download PNG</span>
+                    <div className="grid grid-cols-1 gap-2 2xl:grid-cols-3">
+                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 2xl:col-span-2">
+                        <Button type="button" size="xl" variant="brand" className="min-w-0" onClick={downloadQr} disabled={!qrDataUrl}>
+                          <Download className="size-4 shrink-0" /> <span className="truncate">Download {downloadFormat.toUpperCase()}</span>
+                        </Button>
+                        <Select value={downloadFormat} onValueChange={(value) => setDownloadFormat(value as "png" | "jpg" | "svg")}>
+                          <SelectTrigger className="h-full w-24 shrink-0" aria-label="Download format">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="png">PNG</SelectItem>
+                            <SelectItem value="jpg">JPG</SelectItem>
+                            <SelectItem value="svg">SVG</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyQrImage} disabled={!qrDataUrl}>
+                        <ImageDown className="size-4 shrink-0" /> <span className="truncate">Copy image</span>
                       </Button>
                       <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyPayload} disabled={!qrPayload}>
                         {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
@@ -1157,6 +1224,52 @@ async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): 
   ctx.drawImage(logoImg, x + (box - w) / 2, y + (box - h) / 2, w, h);
 
   return canvas.toDataURL("image/png");
+}
+
+async function pngToJpgDataUrl(pngUrl: string, background: string): Promise<string> {
+  const image = await loadImage(pngUrl);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return pngUrl;
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(image, 0, 0);
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
+
+interface SvgOptions {
+  size: number;
+  margin: number;
+  errorCorrectionLevel: "L" | "M" | "Q" | "H";
+  dark: string;
+  light: string;
+  logoDataUrl: string;
+}
+
+async function buildSvgString(payload: string, options: SvgOptions): Promise<string> {
+  let svg = await QRCode.toString(payload, {
+    type: "svg",
+    width: options.size,
+    margin: options.margin,
+    errorCorrectionLevel: options.errorCorrectionLevel,
+    color: { dark: options.dark, light: options.light },
+  });
+
+  if (options.logoDataUrl) {
+    const box = Math.round(options.size * 0.18);
+    const pad = Math.round(box * 0.1);
+    const radius = Math.round(box * 0.24);
+    const x = (options.size - box) / 2;
+    const y = (options.size - box) / 2;
+    const overlay =
+      `<rect x="${x - pad}" y="${y - pad}" width="${box + pad * 2}" height="${box + pad * 2}" rx="${radius}" fill="#ffffff"/>` +
+      `<image href="${options.logoDataUrl}" x="${x}" y="${y}" width="${box}" height="${box}" preserveAspectRatio="xMidYMid meet"/>`;
+    svg = svg.replace("</svg>", `${overlay}</svg>`);
+  }
+
+  return svg;
 }
 
 function buildPayload(qrType: QrType, form: FormState) {
