@@ -655,7 +655,7 @@ function PixelTagHome() {
                         {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
                         <span className="truncate">{copied ? "Copied" : "Copy content"}</span>
                       </Button>
-                      <Button type="button" size="xl" variant="outline" className="min-w-0 sm:col-span-2 2xl:col-span-4" onClick={clearFields}>
+                      <Button type="button" size="xl" variant="outline" className="min-w-0" onClick={clearFields}>
                         <RotateCcw className="size-4 shrink-0" /> <span className="truncate">Clear</span>
                       </Button>
                     </div>
