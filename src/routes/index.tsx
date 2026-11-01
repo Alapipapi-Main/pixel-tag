@@ -9,6 +9,7 @@ import {
   Copy,
   Download,
   Globe2,
+  ImageDown,
   ImagePlus,
   Mail,
   MessageCircle,
@@ -345,20 +346,70 @@ function PixelTagHome() {
     showToast("Code restored from history", "success");
   };
 
-  const downloadQr = () => {
+  const triggerDownload = (href: string, filename: string) => {
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const downloadQr = async () => {
+    if (!qrDataUrl || !qrPayload) {
+      showToast(validation.message, "error");
+      return;
+    }
+
+    const baseName = `pixel-tag-${qrType}-${qrSize}`;
+
+    try {
+      if (downloadFormat === "svg") {
+        const svg = await buildSvgString(qrPayload, {
+          size: qrSize,
+          margin: logoDataUrl ? 4 : 2,
+          errorCorrectionLevel: logoDataUrl ? "H" : quality,
+          dark: qrColor,
+          light: backgroundColor,
+          logoDataUrl,
+        });
+        triggerDownload(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, `${baseName}.svg`);
+        showToast("SVG downloaded", "success");
+      } else if (downloadFormat === "jpg") {
+        const jpg = await pngToJpgDataUrl(qrDataUrl, backgroundColor);
+        triggerDownload(jpg, `${baseName}.jpg`);
+        showToast("JPG downloaded", "success");
+      } else {
+        triggerDownload(qrDataUrl, `${baseName}.png`);
+        showToast("PNG downloaded", "success");
+      }
+      addToHistory();
+    } catch {
+      showToast("Could not create that file", "error");
+    }
+  };
+
+  const copyQrImage = async () => {
     if (!qrDataUrl) {
       showToast(validation.message, "error");
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = qrDataUrl;
-    link.download = `pixel-tag-${qrType}-${qrSize}.png`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    showToast("PNG downloaded", "success");
-    addToHistory();
+    try {
+      const image = await loadImage(qrDataUrl);
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("No canvas");
+      ctx.drawImage(image, 0, 0);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("No image data");
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      showToast("QR image copied — paste it anywhere", "success");
+    } catch {
+      showToast("Your browser blocked image copy — use Download instead", "error");
+    }
   };
 
   const handleLogoFile = (file: File | undefined) => {
