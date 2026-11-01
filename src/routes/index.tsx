@@ -632,8 +632,8 @@ function PixelTagHome() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-4">
-                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 sm:col-span-2 2xl:col-span-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 2xl:grid-cols-3">
+                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 sm:col-span-2">
                         <Button type="button" size="xl" variant="brand" className="min-w-0" onClick={downloadQr} disabled={!qrDataUrl}>
                           <Download className="size-4 shrink-0" /> <span className="truncate">Download {downloadFormat.toUpperCase()}</span>
                         </Button>
