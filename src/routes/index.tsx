@@ -1226,6 +1226,52 @@ async function composeQrWithLogo(qrUrl: string, logoUrl: string, size: number): 
   return canvas.toDataURL("image/png");
 }
 
+async function pngToJpgDataUrl(pngUrl: string, background: string): Promise<string> {
+  const image = await loadImage(pngUrl);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return pngUrl;
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(image, 0, 0);
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
+
+interface SvgOptions {
+  size: number;
+  margin: number;
+  errorCorrectionLevel: "L" | "M" | "Q" | "H";
+  dark: string;
+  light: string;
+  logoDataUrl: string;
+}
+
+async function buildSvgString(payload: string, options: SvgOptions): Promise<string> {
+  let svg = await QRCode.toString(payload, {
+    type: "svg",
+    width: options.size,
+    margin: options.margin,
+    errorCorrectionLevel: options.errorCorrectionLevel,
+    color: { dark: options.dark, light: options.light },
+  });
+
+  if (options.logoDataUrl) {
+    const box = Math.round(options.size * 0.18);
+    const pad = Math.round(box * 0.1);
+    const radius = Math.round(box * 0.24);
+    const x = (options.size - box) / 2;
+    const y = (options.size - box) / 2;
+    const overlay =
+      `<rect x="${x - pad}" y="${y - pad}" width="${box + pad * 2}" height="${box + pad * 2}" rx="${radius}" fill="#ffffff"/>` +
+      `<image href="${options.logoDataUrl}" x="${x}" y="${y}" width="${box}" height="${box}" preserveAspectRatio="xMidYMid meet"/>`;
+    svg = svg.replace("</svg>", `${overlay}</svg>`);
+  }
+
+  return svg;
+}
+
 function buildPayload(qrType: QrType, form: FormState) {
   if (qrType === "url") {
     const normalized = normalizeUrl(form.url);
