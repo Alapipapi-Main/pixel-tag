@@ -480,9 +480,9 @@ function PixelTagHome() {
               />
             </div>
 
-            <div ref={generatorRef} className="min-w-0 scroll-mt-4 animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
-              <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
-                <section className="min-w-0 rounded-2xl border border-border/80 bg-surface-strong/80 p-4 sm:p-5">
+            <div ref={generatorRef} className="@container/generator min-w-0 scroll-mt-4 animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
+              <div className="grid min-w-0 gap-4 @min-[48rem]/generator:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+                <section className="@container/editor min-w-0 rounded-2xl border border-border/80 bg-surface-strong/80 p-4 sm:p-5">
                   <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-brand">Generator</p>
@@ -497,7 +497,7 @@ function PixelTagHome() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-2">
                     {qrTypes.map((type) => {
                       const Icon = type.icon;
                       const isActive = qrType === type.value;
@@ -525,7 +525,7 @@ function PixelTagHome() {
                   <div className="mt-5 space-y-5">
                     <QrFields qrType={qrType} form={form} updateForm={updateForm} />
 
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 @min-[26rem]/editor:grid-cols-2">
                       <ColorControl
                         label="QR color"
                         value={qrColor}
@@ -632,13 +632,13 @@ function PixelTagHome() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 2xl:grid-cols-3">
-                      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-2 2xl:col-span-2">
-                        <Button type="button" size="xl" variant="brand" className="min-w-0" onClick={downloadQr} disabled={!qrDataUrl}>
-                          <Download className="size-4 shrink-0" /> <span className="truncate">Download {downloadFormat.toUpperCase()}</span>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="grid min-w-0 grid-cols-1 gap-2 @min-[20rem]/editor:grid-cols-[minmax(0,1fr)_6rem]">
+                        <Button type="button" size="xl" variant="brand" className="min-w-0 px-3" onClick={downloadQr} disabled={!qrDataUrl}>
+                          <Download className="size-4 shrink-0" /> <span className="whitespace-normal leading-tight">Download {downloadFormat.toUpperCase()}</span>
                         </Button>
                         <Select value={downloadFormat} onValueChange={(value) => setDownloadFormat(value as "png" | "jpg" | "svg")}>
-                          <SelectTrigger className="h-full w-24 shrink-0" aria-label="Download format">
+                          <SelectTrigger className="h-12 w-full min-w-0" aria-label="Download format">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -649,14 +649,14 @@ function PixelTagHome() {
                         </Select>
                       </div>
                       <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyQrImage} disabled={!qrDataUrl}>
-                        <ImageDown className="size-4 shrink-0" /> <span className="truncate">Copy image</span>
+                        <ImageDown className="size-4 shrink-0" /> <span className="whitespace-normal leading-tight">Copy image</span>
                       </Button>
                       <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyPayload} disabled={!qrPayload}>
                         {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
-                        <span className="truncate">{copied ? "Copied" : "Copy content"}</span>
+                        <span className="whitespace-normal leading-tight">{copied ? "Copied" : "Copy content"}</span>
                       </Button>
                       <Button type="button" size="xl" variant="outline" className="min-w-0" onClick={clearFields}>
-                        <RotateCcw className="size-4 shrink-0" /> <span className="truncate">Clear</span>
+                        <RotateCcw className="size-4 shrink-0" /> <span className="whitespace-normal leading-tight">Clear</span>
                       </Button>
                     </div>
                   </div>

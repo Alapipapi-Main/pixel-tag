@@ -10,4 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Keep multi-item responsive rows on a grid with shrinkable text columns and fixed controls to prevent narrow-screen overlap.
+- Use named container queries for generator columns and color/action rows, and minimum-width auto-fit tracks for QR type buttons, because the editor can be narrow even on a wide desktop viewport.
 - Store recent QR variants by their complete visual configuration and keep uploaded logos compact so device history stays restorable without a backend.
