@@ -21,7 +21,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Clear all fields
 - Input validation (URL, Wi-Fi, email, phone, contact card, SMS, and WhatsApp)
 - Dark and light mode
-- Responsive layout
+- Responsive layout: the generator and preview only sit side by side when their available space allows it; color fields and QR buttons keep full values and labels readable on narrow desktop windows and phones
 - SEO metadata, sitemap, and Open Graph image
 - No account required
 
