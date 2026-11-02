@@ -198,7 +198,16 @@ function PixelTagHome() {
   const [logoDataUrl, setLogoDataUrl] = useState("");
   const [logoName, setLogoName] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
-  const [theme, setTheme] = useState<ThemeMode>("light");
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === "undefined") return "light";
+    try {
+      const storedTheme = window.localStorage.getItem("pixeltag-theme");
+      if (storedTheme === "dark" || storedTheme === "light") return storedTheme;
+    } catch {
+      // Fall back to the system preference when storage is unavailable.
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const [copied, setCopied] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const generatorRef = useRef<HTMLDivElement>(null);
@@ -216,18 +225,15 @@ function PixelTagHome() {
 
 
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem("pixeltag-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const nextTheme: ThemeMode = storedTheme === "dark" || (!storedTheme && prefersDark) ? "dark" : "light";
-    setTheme(nextTheme);
-  }, []);
-
-  useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
     root.classList.toggle("light", theme === "light");
     root.style.colorScheme = theme;
-    window.localStorage.setItem("pixeltag-theme", theme);
+    try {
+      window.localStorage.setItem("pixeltag-theme", theme);
+    } catch {
+      // Theme switching still works when storage is blocked.
+    }
   }, [theme]);
 
   const qrPayload = useMemo(() => buildPayload(qrType, form), [qrType, form]);
@@ -460,10 +466,24 @@ function PixelTagHome() {
     showToast("Fields cleared");
   };
 
+  const toggleTheme = () => {
+    const nextTheme: ThemeMode = theme === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+    root.classList.toggle("dark", nextTheme === "dark");
+    root.classList.toggle("light", nextTheme === "light");
+    root.style.colorScheme = nextTheme;
+    try {
+      window.localStorage.setItem("pixeltag-theme", nextTheme);
+    } catch {
+      // Theme switching still works when storage is blocked.
+    }
+    setTheme(nextTheme);
+  };
+
   return (
     <TooltipProvider>
       <div className="min-h-screen overflow-x-clip bg-page-gradient text-foreground">
-        <SiteHeader theme={theme} onThemeToggle={() => setTheme(theme === "dark" ? "light" : "dark")} />
+        <SiteHeader theme={theme} onThemeToggle={toggleTheme} />
 
         <main className="mx-auto flex w-full max-w-7xl flex-col items-center px-4 pb-10 pt-5 sm:px-6 lg:px-8">
           <section className="grid min-h-[calc(100vh-8rem)] w-full items-center gap-8 py-6 xl:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.28fr)] xl:py-10">
@@ -480,8 +500,8 @@ function PixelTagHome() {
               />
             </div>
 
-            <div ref={generatorRef} className="@container/generator min-w-0 scroll-mt-4 animate-soft-in rounded-3xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
-              <div className="grid min-w-0 gap-4 @min-[48rem]/generator:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+            <div ref={generatorRef} className="@container/generator min-w-0 scroll-mt-4 animate-soft-in rounded-2xl border border-border/80 bg-card/90 p-3 shadow-soft backdrop-blur-xl sm:p-4 lg:p-5">
+              <div className="grid min-w-0 gap-4">
                 <section className="@container/editor min-w-0 rounded-2xl border border-border/80 bg-surface-strong/80 p-4 sm:p-5">
                   <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                     <div className="min-w-0">
@@ -648,13 +668,15 @@ function PixelTagHome() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyQrImage} disabled={!qrDataUrl}>
-                        <ImageDown className="size-4 shrink-0" /> <span className="whitespace-normal leading-tight">Copy image</span>
-                      </Button>
-                      <Button type="button" size="xl" variant="soft" className="min-w-0" onClick={copyPayload} disabled={!qrPayload}>
-                        {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
-                        <span className="whitespace-normal leading-tight">{copied ? "Copied" : "Copy content"}</span>
-                      </Button>
+                      <div className="grid min-w-0 grid-cols-1 gap-2 @min-[24rem]/editor:grid-cols-2">
+                        <Button type="button" size="xl" variant="soft" className="min-w-0 px-2" onClick={copyQrImage} disabled={!qrDataUrl}>
+                          <ImageDown className="size-4 shrink-0" /> <span className="whitespace-normal leading-tight">Copy image</span>
+                        </Button>
+                        <Button type="button" size="xl" variant="soft" className="min-w-0 px-2" onClick={copyPayload} disabled={!qrPayload}>
+                          {copied ? <Check className="size-4 shrink-0" /> : <Copy className="size-4 shrink-0" />}
+                          <span className="whitespace-normal leading-tight">{copied ? "Copied" : "Copy content"}</span>
+                        </Button>
+                      </div>
                       <Button type="button" size="xl" variant="outline" className="min-w-0" onClick={clearFields}>
                         <RotateCcw className="size-4 shrink-0" /> <span className="whitespace-normal leading-tight">Clear</span>
                       </Button>
