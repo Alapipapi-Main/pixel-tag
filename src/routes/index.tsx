@@ -1280,14 +1280,26 @@ async function buildSvgString(payload: string, options: SvgOptions): Promise<str
   });
 
   if (options.logoDataUrl) {
-    const box = Math.round(options.size * 0.18);
+    const viewBoxMatch = svg.match(/viewBox=["']([^"']+)["']/i);
+    const viewBoxValues = viewBoxMatch?.[1].trim().split(/\s+/).map(Number);
+    const viewBoxSize =
+      viewBoxValues && viewBoxValues.length === 4 && viewBoxValues.every(Number.isFinite)
+        ? Math.min(viewBoxValues[2], viewBoxValues[3])
+        : options.size;
+    const box = Math.round(viewBoxSize * 0.18);
     const pad = Math.round(box * 0.1);
     const radius = Math.round(box * 0.24);
-    const x = (options.size - box) / 2;
-    const y = (options.size - box) / 2;
+    const viewBoxX = viewBoxValues?.length === 4 ? viewBoxValues[0] : 0;
+    const viewBoxY = viewBoxValues?.length === 4 ? viewBoxValues[1] : 0;
+    const x = viewBoxX + (viewBoxSize - box) / 2;
+    const y = viewBoxY + (viewBoxSize - box) / 2;
+    const logoUrl = options.logoDataUrl.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
     const overlay =
-      `<rect x="${x - pad}" y="${y - pad}" width="${box + pad * 2}" height="${box + pad * 2}" rx="${radius}" fill="#ffffff"/>` +
-      `<image href="${options.logoDataUrl}" x="${x}" y="${y}" width="${box}" height="${box}" preserveAspectRatio="xMidYMid meet"/>`;
+      `<rect x="${x - pad}" y="${y - pad}" width="${box + pad * 2}" height="${box + pad * 2}" rx="${radius}" fill="${options.light}"/>` +
+      `<image href="${logoUrl}" xlink:href="${logoUrl}" x="${x}" y="${y}" width="${box}" height="${box}" preserveAspectRatio="xMidYMid meet"/>`;
+    if (!/\sxmlns:xlink=/i.test(svg)) {
+      svg = svg.replace(/<svg\b/i, `<svg xmlns:xlink="http://www.w3.org/1999/xlink"`);
+    }
     svg = svg.replace("</svg>", `${overlay}</svg>`);
   }
 
