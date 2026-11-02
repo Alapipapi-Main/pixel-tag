@@ -497,7 +497,7 @@ function PixelTagHome() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-2">
+                  <div className="grid grid-cols-2 gap-2 @min-[26rem]/editor:grid-cols-4">
                     {qrTypes.map((type) => {
                       const Icon = type.icon;
                       const isActive = qrType === type.value;

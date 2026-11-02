@@ -17,5 +17,5 @@ Numbered update sequence, continuing across sessions. Show only a few numbers at
 - 3 (small): History of recently generated codes (device only) — DONE
 
 ## Done
-- Desktop control readability: use available generator space for columns, keep color values and QR button labels readable — verification in progress
+- Desktop control readability: use available generator space for columns, keep color values and QR button labels readable — DONE
 - Base app: QR generator (URL, Text, Wi-Fi, Email, Phone), live preview, colors, size, PNG download, copy, clear, dark/light, responsive, SEO, og image, validation
