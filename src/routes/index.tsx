@@ -1444,9 +1444,12 @@ function frameSvg(innerSvg: string, size: number, style: FrameStyle, caption: st
   const fontSize = Math.round(captionH * 0.38);
   const text = escapeXml(cleanCaption(caption));
   const cy = size + pad * 2 + captionH / 2 - pad / 2;
-  const inner = innerSvg
-    .replace(/<\?xml[^>]*\?>/i, "")
-    .replace(/<svg\b/i, `<svg x="${pad}" y="${pad}" width="${size}" height="${size}"`);
+  const cleanedInnerSvg = innerSvg.replace(/<\?xml[^>]*\?>/i, "").trim();
+  const innerMatch = cleanedInnerSvg.match(/^<svg\b[^>]*>([\s\S]*)<\/svg>\s*$/i);
+  const innerViewBox = cleanedInnerSvg.match(/\bviewBox=["']([^"']+)["']/i)?.[1] ?? `0 0 ${size} ${size}`;
+  const inner = innerMatch
+    ? `<svg x="${pad}" y="${pad}" width="${size}" height="${size}" viewBox="${innerViewBox}" preserveAspectRatio="xMidYMid meet">${innerMatch[1]}</svg>`
+    : "";
   let shapes = `<rect width="${width}" height="${height}" rx="${radius}" fill="${style === "box" ? dark : light}"/>`;
   if (style === "box") {
     shapes += `<rect x="${pad / 2}" y="${pad / 2}" width="${size + pad}" height="${size + pad}" rx="${radius * 0.7}" fill="${light}"/>`;
