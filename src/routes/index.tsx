@@ -1344,7 +1344,7 @@ async function buildSvgString(payload: string, options: SvgOptions): Promise<str
 
   if (options.logoDataUrl) {
     const viewBoxMatch = svg.match(/viewBox=["']([^"']+)["']/i);
-    const viewBoxValues = viewBoxMatch?.[1].trim().split(/\s+/).map(Number);
+    const viewBoxValues = viewBoxMatch?.[1]?.trim().split(/\s+/).map(Number);
     const viewBoxSize =
       viewBoxValues && viewBoxValues.length === 4 && viewBoxValues.every(Number.isFinite)
         ? Math.min(viewBoxValues[2] ?? options.size, viewBoxValues[3] ?? options.size)
