@@ -46,6 +46,15 @@ type ThemeMode = "light" | "dark";
 
 const HISTORY_KEY = "pixeltag-history";
 const HISTORY_LIMIT = 8;
+const FRAME_CAPTION_MAX = 20;
+
+type FrameStyle = "none" | "simple" | "pill" | "box";
+const frameStyles: { value: FrameStyle; label: string }[] = [
+  { value: "none", label: "None" },
+  { value: "simple", label: "Caption" },
+  { value: "pill", label: "Label" },
+  { value: "box", label: "Box" },
+];
 
 type HistoryEntry = {
   id: string;
@@ -56,6 +65,8 @@ type HistoryEntry = {
   backgroundColor: string;
   qrSize: number;
   quality: "L" | "M" | "Q" | "H";
+  frameStyle?: FrameStyle;
+  frameCaption?: string;
   summary: string;
   thumb: string;
   logoDataUrl?: string;
@@ -197,6 +208,8 @@ function PixelTagHome() {
   const [downloadFormat, setDownloadFormat] = useState<"png" | "jpg" | "svg">("png");
   const [logoDataUrl, setLogoDataUrl] = useState("");
   const [logoName, setLogoName] = useState("");
+  const [frameStyle, setFrameStyle] = useState<FrameStyle>("none");
+  const [frameCaption, setFrameCaption] = useState("SCAN ME");
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [theme, setTheme] = useState<ThemeMode>(() => {
     if (typeof window === "undefined") return "light";
@@ -258,16 +271,20 @@ function PixelTagHome() {
     })
       .then(async (url) => {
         if (cancelled) return;
+        let result = url;
         if (logoDataUrl) {
           try {
-            const composed = await composeQrWithLogo(url, logoDataUrl, qrSize);
-            if (!cancelled) setQrDataUrl(composed);
-            return;
+            result = await composeQrWithLogo(url, logoDataUrl, qrSize);
           } catch {
             // fall through to the plain code
           }
         }
-        setQrDataUrl(url);
+        try {
+          result = await applyFrame(result, frameStyle, frameCaption, qrColor, backgroundColor);
+        } catch {
+          // keep unframed code
+        }
+        if (!cancelled) setQrDataUrl(result);
       })
       .catch(() => {
         if (!cancelled) {
@@ -278,7 +295,7 @@ function PixelTagHome() {
     return () => {
       cancelled = true;
     };
-  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, logoDataUrl, validation.valid]);
+  }, [backgroundColor, qrColor, qrPayload, qrSize, quality, logoDataUrl, frameStyle, frameCaption, validation.valid]);
 
   const updateForm = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -316,6 +333,8 @@ function PixelTagHome() {
         backgroundColor,
         qrSize,
         quality,
+        frameStyle,
+        frameCaption,
         summary: qrPayload.slice(0, 80),
         thumb: qrDataUrl,
         ...(logoDataUrl ? { logoDataUrl, logoName } : {}),
@@ -329,6 +348,8 @@ function PixelTagHome() {
             item.backgroundColor === backgroundColor &&
             item.qrSize === qrSize &&
             item.quality === quality &&
+            (item.frameStyle ?? "none") === frameStyle &&
+            (item.frameCaption ?? "SCAN ME") === frameCaption &&
             (item.logoDataUrl ?? "") === logoDataUrl
           ),
       );
@@ -345,6 +366,8 @@ function PixelTagHome() {
     setBackgroundColor(entry.backgroundColor);
     setQrSize(entry.qrSize);
     setQuality(entry.quality);
+    setFrameStyle(entry.frameStyle ?? "none");
+    setFrameCaption(entry.frameCaption ?? "SCAN ME");
     setLogoDataUrl(entry.logoDataUrl ?? "");
     setLogoName(entry.logoName ?? "");
     if (logoInputRef.current) logoInputRef.current.value = "";
@@ -380,7 +403,8 @@ function PixelTagHome() {
           light: backgroundColor,
           logoDataUrl,
         });
-        triggerDownload(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`, `${baseName}.svg`);
+        const framed = frameSvg(svg, qrSize, frameStyle, frameCaption, qrColor, backgroundColor);
+        triggerDownload(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(framed)}`, `${baseName}.svg`);
         showToast("SVG downloaded", "success");
       } else if (downloadFormat === "jpg") {
         const jpg = await pngToJpgDataUrl(qrDataUrl, backgroundColor);
@@ -457,6 +481,8 @@ function PixelTagHome() {
     setBackgroundColor("#ffffff");
     setQrSize(320);
     setQuality("M");
+    setFrameStyle("none");
+    setFrameCaption("SCAN ME");
     removeLogo();
     setCopied(false);
   };
@@ -651,6 +677,43 @@ function PixelTagHome() {
                         A logo covers part of the code, so Pixel Tag uses Max quality automatically to keep it scannable.
                       </p>
                     </div>
+
+                    <div className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+                      <span className="text-base font-semibold">Frame</span>
+                      <div className="mt-3 grid grid-cols-2 gap-2 @min-[28rem]/editor:grid-cols-4" role="radiogroup" aria-label="Frame style">
+                        {frameStyles.map((item) => (
+                          <Button
+                            key={item.value}
+                            type="button"
+                            role="radio"
+                            aria-checked={frameStyle === item.value}
+                            variant={frameStyle === item.value ? "brand" : "soft"}
+                            className="h-auto min-w-0 px-2 py-2.5 text-xs font-semibold"
+                            onClick={() => setFrameStyle(item.value)}
+                          >
+                            {item.label}
+                          </Button>
+                        ))}
+                      </div>
+                      {frameStyle !== "none" ? (
+                        <div className="mt-4 grid gap-2">
+                          <Label htmlFor="frame-caption" className="text-sm font-semibold">
+                            Caption
+                          </Label>
+                          <Input
+                            id="frame-caption"
+                            value={frameCaption}
+                            maxLength={FRAME_CAPTION_MAX}
+                            placeholder="SCAN ME"
+                            onChange={(event) => setFrameCaption(event.target.value)}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Up to {FRAME_CAPTION_MAX} characters. Uses your QR and background colors.
+                          </p>
+                        </div>
+                      ) : null}
+                    </div>
+
 
                     <div className="grid grid-cols-1 gap-2">
                       <div className="grid min-w-0 grid-cols-1 gap-2 @min-[20rem]/editor:grid-cols-[minmax(0,1fr)_6rem]">
@@ -1305,6 +1368,101 @@ async function buildSvgString(payload: string, options: SvgOptions): Promise<str
 
   return svg;
 }
+
+type FrameLayout = { width: number; height: number; pad: number; captionH: number };
+
+function getFrameLayout(size: number): FrameLayout {
+  const pad = Math.round(size * 0.06);
+  const captionH = Math.round(size * 0.2);
+  return { width: size + pad * 2, height: size + pad * 2 + captionH, pad, captionH };
+}
+
+function cleanCaption(caption: string) {
+  return caption.trim().slice(0, FRAME_CAPTION_MAX) || "SCAN ME";
+}
+
+async function applyFrame(qrUrl: string, style: FrameStyle, caption: string, dark: string, light: string): Promise<string> {
+  if (style === "none") return qrUrl;
+  const qr = await loadImage(qrUrl);
+  const size = qr.width;
+  const { width, height, pad, captionH } = getFrameLayout(size);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return qrUrl;
+  const text = cleanCaption(caption);
+  const radius = Math.round(size * 0.06);
+  const fontSize = Math.round(captionH * 0.38);
+  const font = `700 ${fontSize}px "Space Grotesk", "Manrope", sans-serif`;
+  try {
+    await document.fonts?.load(font);
+  } catch {
+    // fallback font is fine
+  }
+
+  ctx.fillStyle = style === "box" ? dark : light;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, width, height, radius);
+  ctx.fill();
+  if (style === "box") {
+    ctx.fillStyle = light;
+    ctx.beginPath();
+    ctx.roundRect(pad / 2, pad / 2, size + pad, size + pad, radius * 0.7);
+    ctx.fill();
+  }
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(qr, pad, pad, size, size);
+  ctx.imageSmoothingEnabled = true;
+
+  ctx.font = font;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const cy = size + pad * 2 + captionH / 2 - pad / 2;
+  if (style === "pill") {
+    const pillW = Math.min(width - pad * 2, ctx.measureText(text).width + fontSize * 2);
+    const pillH = Math.round(captionH * 0.72);
+    ctx.fillStyle = dark;
+    ctx.beginPath();
+    ctx.roundRect((width - pillW) / 2, cy - pillH / 2, pillW, pillH, pillH / 2);
+    ctx.fill();
+    ctx.fillStyle = light;
+  } else {
+    ctx.fillStyle = style === "box" ? light : dark;
+  }
+  ctx.fillText(text, width / 2, cy, width - pad * 3);
+  return canvas.toDataURL("image/png");
+}
+
+function escapeXml(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+function frameSvg(innerSvg: string, size: number, style: FrameStyle, caption: string, dark: string, light: string) {
+  if (style === "none") return innerSvg;
+  const { width, height, pad, captionH } = getFrameLayout(size);
+  const radius = Math.round(size * 0.06);
+  const fontSize = Math.round(captionH * 0.38);
+  const text = escapeXml(cleanCaption(caption));
+  const cy = size + pad * 2 + captionH / 2 - pad / 2;
+  const inner = innerSvg
+    .replace(/<\?xml[^>]*\?>/i, "")
+    .replace(/<svg\b/i, `<svg x="${pad}" y="${pad}" width="${size}" height="${size}"`);
+  let shapes = `<rect width="${width}" height="${height}" rx="${radius}" fill="${style === "box" ? dark : light}"/>`;
+  if (style === "box") {
+    shapes += `<rect x="${pad / 2}" y="${pad / 2}" width="${size + pad}" height="${size + pad}" rx="${radius * 0.7}" fill="${light}"/>`;
+  }
+  let label = "";
+  const textFill = style === "box" || style === "pill" ? light : dark;
+  if (style === "pill") {
+    const pillW = Math.min(width - pad * 2, text.length * fontSize * 0.7 + fontSize * 2);
+    const pillH = Math.round(captionH * 0.72);
+    label += `<rect x="${(width - pillW) / 2}" y="${cy - pillH / 2}" width="${pillW}" height="${pillH}" rx="${pillH / 2}" fill="${dark}"/>`;
+  }
+  label += `<text x="${width / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-family="Space Grotesk, Manrope, Arial, sans-serif" font-weight="700" font-size="${fontSize}" fill="${textFill}">${text}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${shapes}${inner}${label}</svg>`;
+}
+
 
 function buildPayload(qrType: QrType, form: FormState) {
   if (qrType === "url") {
