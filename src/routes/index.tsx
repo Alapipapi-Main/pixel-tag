@@ -1219,8 +1219,7 @@ function PreviewPanel({
             src={qrDataUrl}
             alt={`Generated QR code for ${qrType}`}
             width={qrSize}
-            height={qrSize}
-            className="animate-soft-in h-auto max-h-[20rem] w-full max-w-[20rem] rounded-xl shadow-soft"
+            className="animate-soft-in h-auto max-h-[24rem] w-auto max-w-full object-contain rounded-xl shadow-soft"
           />
         ) : (
           <div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
