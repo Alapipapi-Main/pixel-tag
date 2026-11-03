@@ -1347,13 +1347,13 @@ async function buildSvgString(payload: string, options: SvgOptions): Promise<str
     const viewBoxValues = viewBoxMatch?.[1].trim().split(/\s+/).map(Number);
     const viewBoxSize =
       viewBoxValues && viewBoxValues.length === 4 && viewBoxValues.every(Number.isFinite)
-        ? Math.min(viewBoxValues[2], viewBoxValues[3])
+        ? Math.min(viewBoxValues[2] ?? options.size, viewBoxValues[3] ?? options.size)
         : options.size;
     const box = Math.round(viewBoxSize * 0.18);
     const pad = Math.round(box * 0.1);
     const radius = Math.round(box * 0.24);
-    const viewBoxX = viewBoxValues?.length === 4 ? viewBoxValues[0] : 0;
-    const viewBoxY = viewBoxValues?.length === 4 ? viewBoxValues[1] : 0;
+    const viewBoxX = viewBoxValues?.length === 4 ? (viewBoxValues[0] ?? 0) : 0;
+    const viewBoxY = viewBoxValues?.length === 4 ? (viewBoxValues[1] ?? 0) : 0;
     const x = viewBoxX + (viewBoxSize - box) / 2;
     const y = viewBoxY + (viewBoxSize - box) / 2;
     const logoUrl = options.logoDataUrl.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
