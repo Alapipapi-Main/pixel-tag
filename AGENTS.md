@@ -12,3 +12,4 @@
 - Keep multi-item responsive rows on a grid with shrinkable text columns and fixed controls to prevent narrow-screen overlap.
 - Use named container queries for generator columns, QR type buttons and color/action rows, because the editor can be narrow even on a wide desktop viewport; keep QR types in balanced two- or four-column grids.
 - Store recent QR variants by their complete visual configuration and keep uploaded logos compact so device history stays restorable without a backend.
+- Tracked short links: server functions use the admin client and scope every query by the caller's device key; link tables have RLS with no policies so browsers cannot read them directly.
