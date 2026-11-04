@@ -99,3 +99,7 @@ Issues and small pull requests are welcome, especially around scan reliability, 
 3. Open a pull request describing what changed and how to test it.
 
 Changes pushed to `main` sync back into Lovable.
+
+## Scan tracking (update 7)
+
+For Website URL codes, turn on **Track scans** to encode a short `/r/<code>` link instead of the URL. Each scan is counted (country and device type) and then redirected to the destination. The **Scan dashboard** (`/scans`) lists the tracked links made on this device with total scans, last scan, country and device breakdowns, copy and delete. No account is needed: links are tied to a random device key saved in the browser, so clearing site data hides them from the dashboard (printed codes keep working).

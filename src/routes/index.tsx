@@ -841,6 +841,10 @@ function SiteHeader({ theme, onThemeToggle }: { theme: ThemeMode; onThemeToggle:
         </div>
       </a>
 
+      <div className="flex items-center gap-2">
+      <Button asChild variant="soft" size="sm" className="px-3">
+        <Link to="/scans" aria-label="Scan dashboard"><BarChart3 className="size-4" /><span className="hidden sm:inline">Scans</span></Link>
+      </Button>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button type="button" variant="soft" size="icon" onClick={onThemeToggle} aria-label="Toggle theme">
@@ -849,6 +853,7 @@ function SiteHeader({ theme, onThemeToggle }: { theme: ThemeMode; onThemeToggle:
         </TooltipTrigger>
         <TooltipContent>{theme === "dark" ? "Use light mode" : "Use dark mode"}</TooltipContent>
       </Tooltip>
+      </div>
     </header>
   );
 }
