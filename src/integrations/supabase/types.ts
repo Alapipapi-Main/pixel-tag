@@ -14,7 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      link_scans: {
+        Row: {
+          country: string | null
+          device: string | null
+          id: number
+          scanned_at: string
+          slug: string
+        }
+        Insert: {
+          country?: string | null
+          device?: string | null
+          id?: number
+          scanned_at?: string
+          slug: string
+        }
+        Update: {
+          country?: string | null
+          device?: string | null
+          id?: number
+          scanned_at?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_scans_slug_fkey"
+            columns: ["slug"]
+            isOneToOne: false
+            referencedRelation: "short_links"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      short_links: {
+        Row: {
+          created_at: string
+          destination: string
+          device_id: string
+          label: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          destination: string
+          device_id: string
+          label?: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          destination?: string
+          device_id?: string
+          label?: string
+          slug?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
