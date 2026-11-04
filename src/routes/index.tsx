@@ -1,5 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { getDeviceId } from "@/lib/device-id";
+import { createShortLink } from "@/lib/links.functions";
 import {
+  BarChart3,
   History,
   X,
   AtSign,
@@ -249,7 +253,33 @@ function PixelTagHome() {
     }
   }, [theme]);
 
-  const qrPayload = useMemo(() => buildPayload(qrType, form), [qrType, form]);
+  const basePayload = useMemo(() => buildPayload(qrType, form), [qrType, form]);
+  const [tracked, setTracked] = useState<{ destination: string; shortUrl: string } | null>(null);
+  const [trackingBusy, setTrackingBusy] = useState(false);
+  const createLink = useServerFn(createShortLink);
+  const trackingActive = qrType === "url" && !!tracked && tracked.destination === basePayload;
+  const qrPayload = trackingActive && tracked ? tracked.shortUrl : basePayload;
+
+  const toggleTracking = async (on: boolean) => {
+    if (!on) {
+      setTracked(null);
+      return;
+    }
+    if (qrType !== "url" || !basePayload) {
+      showToast("Enter a valid website URL first", "error");
+      return;
+    }
+    setTrackingBusy(true);
+    try {
+      const { slug } = await createLink({ data: { deviceId: getDeviceId(), destination: basePayload } });
+      setTracked({ destination: basePayload, shortUrl: `${window.location.origin}/r/${slug}` });
+      showToast("Scan tracking on — see results in the dashboard", "success");
+    } catch {
+      showToast("Could not turn on tracking. Try again.", "error");
+    } finally {
+      setTrackingBusy(false);
+    }
+  };
   const validation = useMemo(() => validateForm(qrType, form), [qrType, form]);
 
   useEffect(() => {
@@ -570,6 +600,32 @@ function PixelTagHome() {
 
                   <div className="mt-5 space-y-5">
                     <QrFields qrType={qrType} form={form} updateForm={updateForm} />
+
+                    {qrType === "url" && (
+                      <div className="rounded-2xl border border-border bg-surface p-4">
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                          <div className="min-w-0">
+                            <Label htmlFor="track-scans" className="flex items-center gap-2 text-base font-semibold">
+                              <BarChart3 className="size-4 shrink-0" /> Track scans
+                            </Label>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {trackingActive && tracked
+                                ? <>Code points to <span className="break-all font-mono text-foreground">{tracked.shortUrl.replace(/^https?:\/\//, "")}</span></>
+                                : "Use a short link to count scans by country and device. No account needed."}
+                            </p>
+                          </div>
+                          <Switch
+                            id="track-scans"
+                            checked={trackingActive}
+                            disabled={trackingBusy || (!trackingActive && (!validation.valid || !basePayload))}
+                            onCheckedChange={toggleTracking}
+                          />
+                        </div>
+                        <Link to="/scans" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+                          Open scan dashboard →
+                        </Link>
+                      </div>
+                    )}
 
                     <div className="grid gap-4 @min-[26rem]/editor:grid-cols-2">
                       <ColorControl
