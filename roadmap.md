@@ -3,8 +3,9 @@
 Numbered update sequence, continuing across sessions. Show only a few numbers at a time in chat; when the visible batch is exhausted, propose/request the next batch from the user.
 
 ## Up next (not yet shown or done)
-- 7 (big): Scan tracking with short links (needs backend)
 - 8 (medium): Batch generation from CSV
+
+- 7 (big): Scan tracking with short links + dashboard (device-linked, no sign-up) — DONE
 
 ## Shown to user (batch 2)
 - 4 (medium): More QR types — vCard contact, SMS, WhatsApp link — DONE
