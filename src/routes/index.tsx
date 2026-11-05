@@ -293,6 +293,28 @@ function PixelTagHome() {
   };
   const validation = useMemo(() => validateForm(qrType, form), [qrType, form]);
 
+  const renderQrImage = async (payload: string) => {
+    let result = await QRCode.toDataURL(payload, {
+      width: qrSize,
+      margin: logoDataUrl ? 4 : 2,
+      errorCorrectionLevel: logoDataUrl ? "H" : quality,
+      color: { dark: qrColor, light: backgroundColor },
+    });
+    if (logoDataUrl) {
+      try {
+        result = await composeQrWithLogo(result, logoDataUrl, qrSize);
+      } catch {
+        // plain code
+      }
+    }
+    try {
+      result = await applyFrame(result, frameStyle, frameCaption, qrColor, backgroundColor);
+    } catch {
+      // unframed
+    }
+    return result;
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -301,36 +323,12 @@ function PixelTagHome() {
       return;
     }
 
-    QRCode.toDataURL(qrPayload, {
-      width: qrSize,
-      margin: logoDataUrl ? 4 : 2,
-      errorCorrectionLevel: logoDataUrl ? "H" : quality,
-      color: {
-        dark: qrColor,
-        light: backgroundColor,
-      },
-    })
-      .then(async (url) => {
-        if (cancelled) return;
-        let result = url;
-        if (logoDataUrl) {
-          try {
-            result = await composeQrWithLogo(url, logoDataUrl, qrSize);
-          } catch {
-            // fall through to the plain code
-          }
-        }
-        try {
-          result = await applyFrame(result, frameStyle, frameCaption, qrColor, backgroundColor);
-        } catch {
-          // keep unframed code
-        }
+    renderQrImage(qrPayload)
+      .then((result) => {
         if (!cancelled) setQrDataUrl(result);
       })
       .catch(() => {
-        if (!cancelled) {
-          setQrDataUrl("");
-        }
+        if (!cancelled) setQrDataUrl("");
       });
 
     return () => {
@@ -364,8 +362,9 @@ function PixelTagHome() {
     }
   };
 
-  const addToHistory = () => {
+  const addToHistory = async () => {
     try {
+      const thumb = trackingActive ? await renderQrImage(basePayload) : qrDataUrl;
       const entry: HistoryEntry = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         createdAt: Date.now(),
@@ -377,8 +376,8 @@ function PixelTagHome() {
         quality,
         frameStyle,
         frameCaption,
-        summary: qrPayload.slice(0, 80),
-        thumb: qrDataUrl,
+        summary: basePayload.slice(0, 80),
+        thumb,
         ...(logoDataUrl ? { logoDataUrl, logoName } : {}),
       };
       const rest = history.filter(
@@ -457,7 +456,7 @@ function PixelTagHome() {
         triggerDownload(qrDataUrl, `${baseName}.png`);
         showToast("PNG downloaded", "success");
       }
-      addToHistory();
+      void addToHistory();
     } catch {
       showToast("Could not create that file", "error");
     }
