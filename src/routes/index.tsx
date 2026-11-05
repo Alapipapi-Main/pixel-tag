@@ -348,7 +348,7 @@ function PixelTagHome() {
     }
 
     void saveTrackedLink();
-    await navigator.clipboard.writeText(trackingActive && tracked ? tracked.shortUrl : qrPayload);
+    await navigator.clipboard.writeText(basePayload);
     setCopied(true);
     showToast("Content copied", "success");
     window.setTimeout(() => setCopied(false), 1400);
