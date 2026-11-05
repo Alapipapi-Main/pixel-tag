@@ -8,12 +8,6 @@ async function admin() {
   return supabaseAdmin;
 }
 
-function randomSlug() {
-  const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(7));
-  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
-}
-
 export const createShortLink = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
@@ -25,6 +19,7 @@ export const createShortLink = createServerFn({ method: "POST" })
           .max(2048)
           .refine((v) => /^https?:\/\//i.test(v), "Only web links can be tracked"),
         label: z.string().max(80).optional(),
+        slug: z.string().regex(/^[A-Za-z0-9]{6,20}$/),
       })
       .parse(input),
   )
@@ -36,30 +31,26 @@ export const createShortLink = createServerFn({ method: "POST" })
       .eq("device_id", data.deviceId);
     if ((count ?? 0) >= 200) throw new Error("This device has reached 200 tracked links");
 
-    // Reuse an existing link for the same destination on this device.
     const { data: existing } = await db
       .from("short_links")
-      .select("slug")
-      .eq("device_id", data.deviceId)
-      .eq("destination", data.destination)
+      .select("device_id")
+      .eq("slug", data.slug)
       .maybeSingle();
-    if (existing) return { slug: existing.slug };
-
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const slug = randomSlug();
-      const { error } = await db.from("short_links").insert({
-        slug,
-        device_id: data.deviceId,
-        destination: data.destination,
-        label: data.label ?? "",
-      });
-      if (!error) return { slug };
-      if (error.code !== "23505") {
-        console.error("createShortLink", error);
-        throw new Error("Could not create tracked link");
-      }
+    if (existing) {
+      if (existing.device_id === data.deviceId) return { slug: data.slug };
+      throw new Error("Could not create tracked link");
     }
-    throw new Error("Could not create tracked link");
+    const { error } = await db.from("short_links").insert({
+      slug: data.slug,
+      device_id: data.deviceId,
+      destination: data.destination,
+      label: data.label ?? "",
+    });
+    if (error) {
+      console.error("createShortLink", error);
+      throw new Error("Could not create tracked link");
+    }
+    return { slug: data.slug };
   });
 
 export const listDeviceLinks = createServerFn({ method: "POST" })

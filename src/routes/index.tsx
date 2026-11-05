@@ -191,6 +191,12 @@ const qualityLevels: { value: QualityLevel; label: string; recovery: string }[] 
 
 let toastSequence = 0;
 
+function randomSlug() {
+  const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+}
+
 function showToast(message: string, variant: "default" | "error" | "success" = "default") {
   const options = { id: `pixel-tag-${++toastSequence}` };
   if (variant === "error") {
@@ -254,13 +260,14 @@ function PixelTagHome() {
   }, [theme]);
 
   const basePayload = useMemo(() => buildPayload(qrType, form), [qrType, form]);
-  const [tracked, setTracked] = useState<{ destination: string; shortUrl: string } | null>(null);
-  const [trackingBusy, setTrackingBusy] = useState(false);
+  const [tracked, setTracked] = useState<{ destination: string; slug: string; shortUrl: string; saved: boolean } | null>(null);
+  const trackingBusy = false;
   const createLink = useServerFn(createShortLink);
   const trackingActive = qrType === "url" && !!tracked && tracked.destination === basePayload;
-  const qrPayload = trackingActive && tracked ? tracked.shortUrl : basePayload;
+  // The QR itself carries ?s=1 so only real scans count; copied/clicked short links do not.
+  const qrPayload = trackingActive && tracked ? `${tracked.shortUrl}?s=1` : basePayload;
 
-  const toggleTracking = async (on: boolean) => {
+  const toggleTracking = (on: boolean) => {
     if (!on) {
       setTracked(null);
       return;
@@ -269,15 +276,19 @@ function PixelTagHome() {
       showToast("Enter a valid website URL first", "error");
       return;
     }
-    setTrackingBusy(true);
+    const slug = randomSlug();
+    setTracked({ destination: basePayload, slug, shortUrl: `${window.location.origin}/r/${slug}`, saved: false });
+    showToast("Tracking on — the code is saved to your dashboard when you download or copy it", "success");
+  };
+
+  /** Registers the tracked link only once the user downloads or copies the code. */
+  const saveTrackedLink = async () => {
+    if (!trackingActive || !tracked || tracked.saved) return;
     try {
-      const { slug } = await createLink({ data: { deviceId: getDeviceId(), destination: basePayload } });
-      setTracked({ destination: basePayload, shortUrl: `${window.location.origin}/r/${slug}` });
-      showToast("Scan tracking on — see results in the dashboard", "success");
+      await createLink({ data: { deviceId: getDeviceId(), destination: tracked.destination, slug: tracked.slug } });
+      setTracked((t) => (t && t.slug === tracked.slug ? { ...t, saved: true } : t));
     } catch {
-      showToast("Could not turn on tracking. Try again.", "error");
-    } finally {
-      setTrackingBusy(false);
+      showToast("Could not save the tracked link. Try again.", "error");
     }
   };
   const validation = useMemo(() => validateForm(qrType, form), [qrType, form]);
@@ -337,7 +348,8 @@ function PixelTagHome() {
       return;
     }
 
-    await navigator.clipboard.writeText(qrPayload);
+    void saveTrackedLink();
+    await navigator.clipboard.writeText(trackingActive && tracked ? tracked.shortUrl : qrPayload);
     setCopied(true);
     showToast("Content copied", "success");
     window.setTimeout(() => setCopied(false), 1400);
@@ -422,6 +434,7 @@ function PixelTagHome() {
     }
 
     const baseName = `pixel-tag-${qrType}-${qrSize}`;
+    void saveTrackedLink();
 
     try {
       if (downloadFormat === "svg") {
@@ -456,6 +469,7 @@ function PixelTagHome() {
       return;
     }
 
+    void saveTrackedLink();
     try {
       const image = await loadImage(qrDataUrl);
       const canvas = document.createElement("canvas");

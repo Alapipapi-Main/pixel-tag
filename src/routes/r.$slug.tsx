@@ -24,7 +24,8 @@ export const Route = createFileRoute("/r/$slug")({
         if (!data) return new Response("Link not found", { status: 404 });
 
         const ua = request.headers.get("user-agent") ?? "";
-        if (!/bot|crawler|spider|preview/i.test(ua)) {
+        const fromScan = new URL(request.url).searchParams.get("s") === "1";
+        if (fromScan && !/bot|crawler|spider|preview/i.test(ua)) {
           const country = request.headers.get("cf-ipcountry");
           await supabaseAdmin.from("link_scans").insert({
             slug,
