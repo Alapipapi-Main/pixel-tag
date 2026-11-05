@@ -277,7 +277,7 @@ function PixelTagHome() {
       return;
     }
     const slug = randomSlug();
-    setTracked({ destination: basePayload, slug, shortUrl: `${window.location.origin}/r/${slug}`, saved: false });
+    setTracked({ destination: basePayload, slug, shortUrl: `${/lovable\.app$/.test(window.location.hostname) || window.location.hostname === "localhost" ? "https://pixel-tag.lovable.app" : window.location.origin}/r/${slug}`, saved: false });
     showToast("Tracking on — the code is saved to your dashboard when you download or copy it", "success");
   };
 
