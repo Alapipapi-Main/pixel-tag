@@ -17,7 +17,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Frames: add a "SCAN ME" style caption below the code (Caption, Label, or Box style) with your own text up to 20 characters, in the QR and background colors; included in the preview, every download, copied image, and recent codes
 - Download as PNG, JPG, or SVG (SVG keeps the center logo embedded and scales to any size)
 - Copy the QR image straight to the clipboard
-- Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected; tracked website codes appear with their original link and a picture of the original (untracked) code
+- Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected; tracked website codes appear with their original link and a picture of the original (untracked) code; restoring a code always starts with Track scans turned off
 - Copy the entered content
 - Clear all fields
 - Input validation (URL, Wi-Fi, email, phone, contact card, SMS, and WhatsApp)

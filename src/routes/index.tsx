@@ -411,6 +411,7 @@ function PixelTagHome() {
     setFrameCaption(entry.frameCaption ?? "SCAN ME");
     setLogoDataUrl(entry.logoDataUrl ?? "");
     setLogoName(entry.logoName ?? "");
+    setTracked(null);
     if (logoInputRef.current) logoInputRef.current.value = "";
     setCopied(false);
     generatorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
