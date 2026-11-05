@@ -337,6 +337,7 @@ function PixelTagHome() {
   }, [backgroundColor, qrColor, qrPayload, qrSize, quality, logoDataUrl, frameStyle, frameCaption, validation.valid]);
 
   const updateForm = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setTracked(null);
     setForm((current) => ({ ...current, [key]: value }));
   };
 
@@ -520,6 +521,7 @@ function PixelTagHome() {
   };
 
   const resetAll = () => {
+    setTracked(null);
     setForm(defaultForm);
     setQrColor("#0f172a");
     setBackgroundColor("#ffffff");
