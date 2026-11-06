@@ -20,7 +20,14 @@ function downloadBlob(blob: Blob, filename: string) {
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
 
-export function BatchGenerator({ dark, light, size }: { dark: string; light: string; size: number }) {
+const DEFAULT_QR_OPTIONS = {
+  width: 320,
+  margin: 2,
+  errorCorrectionLevel: "M" as const,
+  color: { dark: "#0f172a", light: "#ffffff" },
+};
+
+export function BatchGenerator() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<{ id: string; name: string; rows: BatchRow[] }[]>([]);
   const rows = files.flatMap((f) => f.rows).slice(0, 500);
@@ -42,7 +49,7 @@ export function BatchGenerator({ dark, light, size }: { dark: string; light: str
     try {
       const archive = new JSZip();
       const used = new Set<string>();
-      const opts = { width: size, margin: 2, errorCorrectionLevel: "M" as const, color: { dark, light } };
+      const opts = DEFAULT_QR_OPTIONS;
       for (const [i, row] of rows.entries()) {
         const name = safeFileName(row.name, i, used);
         if (format === "svg") {
@@ -68,7 +75,7 @@ export function BatchGenerator({ dark, light, size }: { dark: string; light: str
           <p className="text-sm font-semibold text-brand">Batch</p>
           <h2 className="font-display text-2xl font-bold">Make many codes from a CSV</h2>
           <p className="text-sm text-muted-foreground">
-            One code per row. Use a <b>content</b> column (link or text) and an optional <b>name</b> column for file names, or leave it out and all columns in a row are combined. Up to 500 rows. Uses your current QR color, background, and size.
+            One code per row. Use a <b>content</b> column (link or text) and an optional <b>name</b> column for file names, or leave it out and all columns in a row are combined. Up to 500 rows. Uses the default QR style and stays separate from the main generator.
           </p>
         </div>
         <div className="min-w-0 space-y-3">

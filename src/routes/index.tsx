@@ -831,7 +831,7 @@ function PixelTagHome() {
             </div>
           </section>
 
-          <BatchGenerator dark={qrColor} light={backgroundColor} size={qrSize} />
+          <BatchGenerator />
         </main>
 
         <SiteFooter />
