@@ -30,9 +30,9 @@ export function BatchGenerator({ dark, light, size }: { dark: string; light: str
 
   const onFile = async (file?: File) => {
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) return toast.error("CSV must be under 2MB");
+    if (file.size > 2 * 1024 * 1024) { toast.error("CSV must be under 2MB"); return; }
     const parsed = parseBatchCsv(await file.text());
-    if (!parsed.length) return toast.error("No rows found in that CSV");
+    if (!parsed.length) { toast.error("No rows found in that CSV"); return; }
     setRows(parsed);
     setFileName(file.name);
     setZip(null);
