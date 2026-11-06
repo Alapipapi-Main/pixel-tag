@@ -3,7 +3,8 @@
 Numbered update sequence, continuing across sessions. Show only a few numbers at a time in chat; when the visible batch is exhausted, propose/request the next batch from the user.
 
 ## Up next (not yet shown or done)
-- 8 (medium): Batch generation from CSV
+- 8 (medium): Batch generation from CSV (PNG + SVG ZIP) — DONE
+- 9 (small): PDF print sheet
 
 - 7 (big): Scan tracking with short links + dashboard (device-linked, no sign-up) — DONE
 

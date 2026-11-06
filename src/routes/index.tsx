@@ -42,6 +42,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import pixeltagLogo from "@/assets/pixeltag-logo.png";
+import { BatchGenerator } from "@/components/BatchGenerator";
 import { cn } from "@/lib/utils";
 
 type QrType = "url" | "text" | "wifi" | "email" | "phone" | "vcard" | "sms" | "whatsapp";
@@ -830,6 +831,7 @@ function PixelTagHome() {
             </div>
           </section>
 
+          <BatchGenerator dark={qrColor} light={backgroundColor} size={qrSize} />
         </main>
 
         <SiteFooter />
