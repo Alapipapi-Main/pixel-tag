@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import QRCode from "qrcode";
-import { FileSpreadsheet, Download, Upload } from "lucide-react";
+import { FileSpreadsheet, Download, Upload, X, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,8 @@ function downloadBlob(blob: Blob, filename: string) {
 
 export function BatchGenerator({ dark, light, size }: { dark: string; light: string; size: number }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [rows, setRows] = useState<BatchRow[]>([]);
-  const [fileName, setFileName] = useState("");
+  const [files, setFiles] = useState<{ id: string; name: string; rows: BatchRow[] }[]>([]);
+  const rows = files.flatMap((f) => f.rows).slice(0, 500);
   const [format, setFormat] = useState<Format>("png");
   const [busy, setBusy] = useState(false);
   const [zip, setZip] = useState<Blob | null>(null);
@@ -33,8 +33,7 @@ export function BatchGenerator({ dark, light, size }: { dark: string; light: str
     if (file.size > 2 * 1024 * 1024) { toast.error("CSV must be under 2MB"); return; }
     const parsed = parseBatchCsv(await file.text());
     if (!parsed.length) { toast.error("No rows found in that CSV"); return; }
-    setRows(parsed);
-    setFileName(file.name);
+    setFiles((prev) => [...prev, { id: crypto.randomUUID(), name: file.name, rows: parsed }]);
     setZip(null);
   };
 
@@ -75,14 +74,26 @@ export function BatchGenerator({ dark, light, size }: { dark: string; light: str
         <div className="min-w-0 space-y-3">
           <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = ""; }} />
           <Button variant="outline" className="w-full" onClick={() => inputRef.current?.click()}>
-            <Upload /> {fileName ? "Choose another CSV" : "Upload CSV"}
+            <Upload /> {files.length ? "Add another CSV" : "Upload CSV"}
           </Button>
-          {rows.length > 0 && (
-            <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
-              <FileSpreadsheet className="size-4 shrink-0" />
-              <span className="truncate">{fileName}</span>
-              <span className="shrink-0">· {rows.length} rows</span>
-            </p>
+          {files.length > 0 && (
+            <div className="space-y-2">
+              <ul className="space-y-1">
+                {files.map((f) => (
+                  <li key={f.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 rounded-xl border border-border px-3 py-1.5 text-sm text-muted-foreground">
+                    <FileSpreadsheet className="size-4" />
+                    <span className="truncate">{f.name}</span>
+                    <span>{f.rows.length} rows</span>
+                    <button type="button" aria-label={`Remove ${f.name}`} className="rounded-md p-1 hover:text-foreground" onClick={() => { setFiles((p) => p.filter((x) => x.id !== f.id)); setZip(null); }}>
+                      <X className="size-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <Button variant="ghost" size="sm" className="w-full" onClick={() => { setFiles([]); setZip(null); }}>
+                <Trash2 /> Clear all CSV files
+              </Button>
+            </div>
           )}
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Batch format">
             {(["png", "svg"] as Format[]).map((f) => (

@@ -106,3 +106,5 @@ Changes pushed to `main` sync back into Lovable.
 For Website URL codes, turn on **Track scans** to encode a short `/r/<code>` link instead of the URL. Each scan is counted (country and device type) and then redirected to the destination. The **Scan dashboard** (`/scans`) lists the tracked links made on this device with total scans, last scan, country and device breakdowns, copy and delete. No account is needed: links are tied to a random device key saved in the browser, so clearing site data hides them from the dashboard (printed codes keep working).
 
 A tracked link is only saved to the dashboard when the code is downloaded or copied while **Track scans** is on. Only real scans are counted: the QR code itself carries a scan marker (`?s=1`), so opening or clicking the copied short link does not add a scan.
+
+- Batch: add several CSV files, remove any one of them, or clear all at once (combined up to 500 rows).
