@@ -108,3 +108,4 @@ For Website URL codes, turn on **Track scans** to encode a short `/r/<code>` lin
 A tracked link is only saved to the dashboard when the code is downloaded or copied while **Track scans** is on. Only real scans are counted: the QR code itself carries a scan marker (`?s=1`), so opening or clicking the copied short link does not add a scan.
 
 - Batch: add several CSV files, remove any one of them, or clear all at once (combined up to 500 rows).
+- Batch: CSVs without a content column now combine every column of a row into its code.

@@ -23,13 +23,15 @@ export function parseBatchCsv(text: string, limit = 500): BatchRow[] {
   const clean = rows.map((r) => r.map((c) => c.trim())).filter((r) => r.some(Boolean));
   if (!clean.length) return [];
   const header = (clean[0] ?? []).map((c) => c.toLowerCase());
-  let contentIdx = header.findIndex((h) => ["content", "url", "link", "text", "data"].includes(h));
+  const contentIdx = header.findIndex((h) => ["content", "url", "link", "text", "data"].includes(h));
   const nameIdx = header.findIndex((h) => ["name", "filename", "label", "title"].includes(h));
   const hasHeader = contentIdx >= 0 || nameIdx >= 0;
-  if (contentIdx < 0) contentIdx = nameIdx === 0 ? 1 : 0;
   const body = hasHeader ? clean.slice(1) : clean;
+  // No content column found: use every column (except name) joined with spaces.
+  const pick = (r: string[]) =>
+    contentIdx >= 0 ? (r[contentIdx] ?? "") : r.filter((c, i) => i !== nameIdx && c).join(" ");
   return body
-    .map((r) => ({ content: r[contentIdx] ?? "", name: nameIdx >= 0 ? (r[nameIdx] ?? "") : "" }))
+    .map((r) => ({ content: pick(r), name: nameIdx >= 0 ? (r[nameIdx] ?? "") : "" }))
     .filter((r) => r.content)
     .slice(0, limit);
 }
