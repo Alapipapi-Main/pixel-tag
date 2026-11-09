@@ -18,7 +18,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Download as PNG, JPG, or SVG (SVG keeps the center logo embedded and scales to any size)
 - Copy the QR image straight to the clipboard
 - Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected; tracked website codes appear with their original link and a picture of the original (untracked) code; restoring a code always starts with Track scans turned off
-- Batch generation (update 8): upload a CSV (a `content` column plus optional `name` column, or content in the first column; up to 500 rows) and download every code as a ZIP of PNG or SVG files, using the current colors and size
+- Batch generation: upload a CSV (a `content` column plus optional `name` column, or content in the first column; up to 500 rows) and download every code as a ZIP of PNG or SVG files.
 - Copy the entered content
 - Clear all fields
 - Input validation (URL, Wi-Fi, email, phone, contact card, SMS, and WhatsApp)
@@ -101,7 +101,7 @@ Issues and small pull requests are welcome, especially around scan reliability, 
 
 Changes pushed to `main` sync back into Lovable.
 
-## Scan tracking (update 7)
+## Scan tracking
 
 For Website URL codes, turn on **Track scans** to encode a short `/r/<code>` link instead of the URL. Each scan is counted (country and device type) and then redirected to the destination. The **Scan dashboard** (`/scans`) lists the tracked links made on this device with total scans, last scan, country and device breakdowns, copy and delete. No account is needed: links are tied to a random device key saved in the browser, so clearing site data hides them from the dashboard (printed codes keep working).
 
