@@ -18,7 +18,7 @@ Pixel Tag is a fast, no-signup QR studio. Pick a type, customize the code, and d
 - Download as PNG, JPG, or SVG (SVG keeps the center logo embedded and scales to any size)
 - Copy the QR image straight to the clipboard
 - Recent codes: the last 8 downloaded codes are saved on your device only; each size, quality, color, content, and center-logo combination is kept separately, with the logo visible in its preview and restored when selected; tracked website codes appear with their original link and a picture of the original (untracked) code; restoring a code always starts with Track scans turned off
-- Batch generation: upload a CSV (a `content` column plus optional `name` column, or content in the first column; up to 500 rows) and download every code as a ZIP of PNG or SVG files.
+- Batch generation: upload a CSV (a `content` column plus optional `name` column, or content in the first column; up to 500 rows) and download every code as a ZIP of PNG or SVG files
 - Copy the entered content
 - Clear all fields
 - Input validation (URL, Wi-Fi, email, phone, contact card, SMS, and WhatsApp)
